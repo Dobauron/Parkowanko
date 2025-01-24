@@ -6,12 +6,11 @@ from .serializers import ParkingPointSerializer
 
 class ParkingPointViewSet(viewsets.ModelViewSet):
     """
-    ViewSet dla modelu ParkingSpot, który umożliwia pełne operacje CRUD.
+    ViewSet dla modelu ParkingPoint, który umożliwia pełne operacje CRUD.
     """
 
     queryset = ParkingPoint.objects.all()
     serializer_class = ParkingPointSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         """
