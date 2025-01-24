@@ -4,7 +4,7 @@ from .views import ParkingPointViewSet
 
 # Tworzymy router i rejestrujemy nasz ViewSet
 router = DefaultRouter()
-router.register(r"parking-points", ParkingPointViewSet, basename="parking-point")
+router.register(r"", ParkingPointViewSet, basename="parking-point")
 
 urlpatterns = [
     path("", include(router.urls)),
