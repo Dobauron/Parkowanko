@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "auth_system",
+    "parking_point",
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
