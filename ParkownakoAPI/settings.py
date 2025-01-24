@@ -141,3 +141,6 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'auth_system.Account'
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Upewnij się, że katalog na pliki statyczne istnieje
