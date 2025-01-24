@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Dobauron <safetysafetystrazak@gmail.com>"]
 readme = "README.md"
-python = ">=3.12"
 
 [tool.poetry.dependencies]
 django = ">=5.1.5,<6.0.0"
