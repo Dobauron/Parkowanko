@@ -11,10 +11,10 @@ class ParkingPointSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         new_location = attrs.get("location", {})
         try:
-            new_lat = float(new_location.get("latitude"))
-            new_lon = float(new_location.get("longitude"))
+            new_lat = float(new_location.get("lat"))
+            new_lon = float(new_location.get("lng"))
         except (TypeError, ValueError):
-            raise serializers.ValidationError("Szerokość i długość geograficzna muszą być liczbami.")
+            raise serializers.ValidationError("Szerokość i długość geograficzna muszą być liczbami lub są podane inne nazwy kluczy niż lat i lng")
 
         # Sprawdzenie zakresów latitude i longitude
         if not (-90 <= new_lat <= 90):
@@ -42,8 +42,8 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         for point in existing_points:
             existing_location = point.location
             try:
-                existing_lat = float(existing_location.get("latitude"))
-                existing_lon = float(existing_location.get("longitude"))
+                existing_lat = float(existing_location.get("lat"))
+                existing_lon = float(existing_location.get("lng"))
             except (TypeError, ValueError):
                 continue  # Pomijamy punkty z niepełnymi danymi
 
