@@ -9,8 +9,18 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, attrs):
-        new_lat = attrs["location"]["latitude"]
-        new_lon = attrs["location"]["longitude"]
+        new_location = attrs.get("location", {})
+        try:
+            new_lat = float(new_location.get("latitude"))
+            new_lon = float(new_location.get("longitude"))
+        except (TypeError, ValueError):
+            raise serializers.ValidationError("Szerokość i długość geograficzna muszą być liczbami.")
+
+        # Sprawdzenie zakresów latitude i longitude
+        if not (-90 <= new_lat <= 90):
+            raise serializers.ValidationError("Szerokość geograficzna (latitude) musi być w zakresie od -90 do 90.")
+        if not (-180 <= new_lon <= 180):
+            raise serializers.ValidationError("Długość geograficzna (longitude) musi być w zakresie od -180 do 180.")
 
         # Pobierz wszystkie istniejące punkty parkingowe
         existing_points = ParkingPoint.objects.all()
@@ -30,8 +40,12 @@ class ParkingPointSerializer(serializers.ModelSerializer):
 
         # Sprawdź odległość dla każdego istniejącego punktu
         for point in existing_points:
-            existing_lat = point.location["latitude"]
-            existing_lon = point.location["longitude"]
+            existing_location = point.location
+            try:
+                existing_lat = float(existing_location.get("latitude"))
+                existing_lon = float(existing_location.get("longitude"))
+            except (TypeError, ValueError):
+                continue  # Pomijamy punkty z niepełnymi danymi
 
             distance = haversine(new_lat, new_lon, existing_lat, existing_lon)
             if distance < 100:  # Jeśli odległość jest mniejsza niż 100 metrów, zwróć błąd
