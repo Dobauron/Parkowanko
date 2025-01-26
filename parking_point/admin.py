@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import ParkingPoint
 
+
 @admin.register(ParkingPoint)
 class ParkingPointAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "description", "created_at", "updated_at")
