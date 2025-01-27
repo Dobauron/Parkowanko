@@ -3,7 +3,7 @@ from django.db import models
 
 class ParkingPoint(models.Model):
     # Podstawowe metadane
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
 
     # Pole dla szerokości i długości geograficznej

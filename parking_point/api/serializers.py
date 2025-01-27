@@ -22,3 +22,8 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         validate_location(new_lat, new_lng)
 
         return attrs
+
+    def validate_location(self, value):
+        if not value:
+            raise serializers.ValidationError("Pole location jest wymagane.")
+        return value
