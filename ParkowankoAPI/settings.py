@@ -140,11 +140,13 @@ STATIC_ROOT = (
     BASE_DIR / "staticfiles"
 )  # Upewnij się, że katalog na pliki statyczne istnieje
 
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:4200",  # Dla React, Vue, Angular itp. uruchomionych lokalnie
+#     "https://parkowanko.onrender.com",  # Produkcyjna domena
+# ]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",  # Dla React, Vue, Angular itp. uruchomionych lokalnie
-    "https://parkowanko.onrender.com",  # Produkcyjna domena
-]
+CSRF_TRUSTED_ORIGINS = ["*"]
 CORS_ALLOW_HEADERS = [
     'authorization',
     'content-type',
