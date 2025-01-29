@@ -43,9 +43,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -137,3 +139,15 @@ STATIC_URL = "/static/"
 STATIC_ROOT = (
     BASE_DIR / "staticfiles"
 )  # Upewnij się, że katalog na pliki statyczne istnieje
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",  # Dla React, Vue, Angular itp. uruchomionych lokalnie
+    "https://parkowanko.onrender.com",  # Produkcyjna domena
+]
+CORS_ALLOW_HEADERS = [
+    'authorization',
+    'content-type',
+    'x-csrftoken',
+    'x-requested-with',
+]
