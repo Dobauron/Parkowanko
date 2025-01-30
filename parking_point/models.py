@@ -7,7 +7,7 @@ class ParkingPoint(models.Model):
     description = models.TextField(blank=True, null=True)
 
     # Pole dla szerokości i długości geograficznej
-    location = models.JSONField(verbose_name="coordynaty", default=dict)
+    location = models.JSONField(verbose_name="coordynaty", null=False, blank=False)
     # Metadane czasowe
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Utworzono")
     updated_at = models.DateTimeField(
