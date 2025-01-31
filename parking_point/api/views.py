@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from ..models import ParkingPoint
 from .serializers import ParkingPointSerializer
 from .validators import validate_location
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny
 
 
 class ParkingPointViewSet(viewsets.ModelViewSet):
@@ -14,7 +14,11 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
 
     queryset = ParkingPoint.objects.all()
     serializer_class = ParkingPointSerializer
+    permission_classes = [AllowAny]
 
+    def perform_create(self, serializer):
+        user = self.request.user if self.request.user.is_authenticated else None
+        serializer.save(user=user)
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
