@@ -2,6 +2,7 @@ import pytest
 from ..serializers import RegisterSerializer, ChangePasswordSerializer
 from auth_system.models import Account
 
+
 @pytest.mark.django_db
 class TestRegisterSerializer:
     def test_register_serializer_valid_data(self):
@@ -16,7 +17,9 @@ class TestRegisterSerializer:
         user = serializer.save()
         assert user.email == data["email"]
         assert user.username == data["username"]
-        assert user.check_password(data["password"])  # Sprawdzenie, czy hasło zostało zapisane
+        assert user.check_password(
+            data["password"]
+        )  # Sprawdzenie, czy hasło zostało zapisane
         assert user.is_active is True  # Użytkownik powinien być aktywny
         assert user.is_staff is False  # Użytkownik nie jest administratorem
         assert user.is_superuser is False  # Użytkownik nie jest superużytkownikiem
