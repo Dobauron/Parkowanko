@@ -1,11 +1,9 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 from .views import ParkingPointViewSet
 
 # Tworzymy router i rejestrujemy nasz ViewSet
-router = DefaultRouter()
+router = SimpleRouter()
 router.register(r"", ParkingPointViewSet, basename="parking-point")
 
-urlpatterns = [
-    path("", include(router.urls)),
-]
+urlpatterns = router.urls
