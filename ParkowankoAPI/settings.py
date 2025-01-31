@@ -147,10 +147,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 #     "https://parkowanko.onrender.com",  # Produkcyjna domena
 # ]
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:4200","https://parkowanko.onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:4200", "https://parkowanko.onrender.com"]
 CORS_ALLOW_HEADERS = [
-    'authorization',
-    'content-type',
-    'x-csrftoken',
-    'x-requested-with',
+    "authorization",
+    "content-type",
+    "x-csrftoken",
+    "x-requested-with",
 ]
