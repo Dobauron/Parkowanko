@@ -10,6 +10,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ("email", "username", "password")
         extra_kwargs = {"password": {"write_only": True}}
 
+    def validate_password(self, value):
+        try:
+            validate_password(value)  # Uruchamiamy walidację hasła z Django
+        except ValidationError as e:
+            raise serializers.ValidationError({"password": e.messages})
+        return value
+
     def create(self, validated_data):
         user = Account.objects.create_user(
             email=validated_data["email"],
