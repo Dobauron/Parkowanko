@@ -43,7 +43,7 @@ def validate_proximity_to_existing_points(new_lat, new_lng, exclude_id=None):
             raise ValidationError("Błąd w danych lokalizacji istniejących punktów.")
 
         distance = haversine(new_lat, new_lng, existing_lat, existing_lng)
-        if distance < 100:  # Za blisko innego punktu
+        if distance < 40:  # Za blisko innego punktu
             raise ValidationError(
                 {
                     "locationError": f"Nowa lokalizacja znajduje się zbyt blisko istniejącego punktu: {point.name} ({distance:.2f}m)."

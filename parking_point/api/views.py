@@ -16,6 +16,7 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
     serializer_class = ParkingPointSerializer
     permission_classes = [AllowAny]
 
+    # Walidacja create wykonywana jest w serializerze!!!
     def perform_create(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
         serializer.save(user=user)
