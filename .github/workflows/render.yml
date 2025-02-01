@@ -23,16 +23,16 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
           
-      - name: Set environment variables
+      - name: Set environment variables, Run tests
+        run: |
+          source venv/bin/activate
+          pytest
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG: ${{ secrets.DEBUG }}
 
-      - name: Run tests
-        run: |
-          source venv/bin/activate
-          pytest
+
 
   deploy:
     needs: test  # Deploy wykona się tylko, jeśli testy przejdą
