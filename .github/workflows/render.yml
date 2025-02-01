@@ -23,9 +23,11 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
           
-      - name: Set DJANGO_SECRET_KEY environment variable
-        run: echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> $GITHUB_ENV
-
+      - name: Set environment variables
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
 
       - name: Run tests
         run: |
