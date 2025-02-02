@@ -10,7 +10,9 @@ class TestParkingPointSerializer:
     @pytest.fixture
     def user(self):
         """Tworzy użytkownika testowego"""
-        return get_user_model().objects.create_user(email="test@example.com", password="testpass")
+        return get_user_model().objects.create_user(
+            email="test@example.com", password="testpass"
+        )
 
     @pytest.fixture
     def valid_data(self, user):
@@ -18,7 +20,7 @@ class TestParkingPointSerializer:
         return {
             "name": "Test Parking",
             "location": {"lat": 52.2297, "lng": 21.0122},
-            "user": user.id
+            "user": user.id,
         }
 
     def test_valid_serialization(self, valid_data):
@@ -45,7 +47,7 @@ class TestParkingPointSerializer:
         existing_point = ParkingPoint.objects.create(
             name="Existing Parking",
             location={"lat": 52.2297, "lng": 21.0122},
-            user=user
+            user=user,
         )
 
         # Nowy punkt jest bardzo blisko (powinien zwrócić błąd)
@@ -59,4 +61,3 @@ class TestParkingPointSerializer:
         serializer = ParkingPointSerializer(data=valid_data)
         assert not serializer.is_valid()
         assert "This field may not be null." in str(serializer.errors)
-
