@@ -22,7 +22,10 @@ class TestParkingPointModel:
             name="Test Parking Point",
             description="Opis testowego punktu parkingowego",
             user=user,
-            location={"latitude": 52.2297, "longitude": 21.0122},  # Przykładowe współrzędne
+            location={
+                "latitude": 52.2297,
+                "longitude": 21.0122,
+            },  # Przykładowe współrzędne
         )
 
     def test_parking_point_creation(self, parking_point):
