@@ -15,7 +15,7 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             new_lng = float(attrs["location"]["lng"])
         except (KeyError, ValueError):
             raise serializers.ValidationError(
-                "Nieprawidłowe dane lokalizacji: 'lat' i 'lng' muszą być liczbami."
+                {"error":"Nieprawidłowe dane lokalizacji: 'lat' i 'lng' muszą być liczbami."}
             )
 
         # Walidacja lokalizacji
@@ -23,7 +23,7 @@ class ParkingPointSerializer(serializers.ModelSerializer):
 
         return attrs
 
-    def validate_location(self, value):
-        if not value:
-            raise serializers.ValidationError("Pole location jest wymagane.")
-        return value
+    def to_internal_value(self, data):
+        if 'location' not in data or not data['location']:
+            raise serializers.ValidationError({"error": "Pole location jest wymagane."})
+        return super().to_internal_value(data)
