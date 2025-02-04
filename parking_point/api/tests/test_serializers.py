@@ -33,7 +33,7 @@ class TestParkingPointSerializer:
         valid_data.pop("location")
         serializer = ParkingPointSerializer(data=valid_data)
         assert not serializer.is_valid()
-        assert "location" in serializer.errors
+        assert "error" in serializer.errors
 
     def test_invalid_location_format(self, valid_data):
         """Test nieprawidłowego formatu współrzędnych"""
@@ -41,6 +41,7 @@ class TestParkingPointSerializer:
         serializer = ParkingPointSerializer(data=valid_data)
         assert not serializer.is_valid()
         assert "Nieprawidłowe dane lokalizacji" in str(serializer.errors)
+        assert "error" in serializer.errors
 
     def test_location_too_close(self, valid_data, user):
         """Test sprawdzający, czy serializer wykrywa zbyt bliskie punkty"""
@@ -54,10 +55,12 @@ class TestParkingPointSerializer:
         serializer = ParkingPointSerializer(data=valid_data)
         assert not serializer.is_valid()
         assert "Nowa lokalizacja znajduje się zbyt blisko" in str(serializer.errors)
+        assert "error" in serializer.errors
 
     def test_validate_location_empty(self, valid_data):
         """Test walidacji pustego pola location"""
         valid_data["location"] = None
         serializer = ParkingPointSerializer(data=valid_data)
         assert not serializer.is_valid()
-        assert "This field may not be null." in str(serializer.errors)
+        assert "Pole location jest wymagane." in str(serializer.errors)
+        assert "error" in serializer.errors
