@@ -23,3 +23,7 @@ class ParkingPoint(models.Model):
 
     def __str__(self):
         return self.name
+
+    def check_and_delete(self):
+        if self.reports.count() >= 3:
+            self.delete()
