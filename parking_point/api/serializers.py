@@ -9,7 +9,6 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, attrs):
-        print("*********************")
         # Pobierz dane lokalizacji
         try:
             new_lat = float(attrs["location"]["lat"])
