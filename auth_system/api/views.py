@@ -1,10 +1,14 @@
 from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework import status
 from .serializers import RegisterSerializer, ChangePasswordSerializer
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
+from json import loads
+import requests
+from django.contrib.auth import get_user_model
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
 
 
 class RegisterView(generics.GenericAPIView):
@@ -56,3 +60,52 @@ class ChangePasswordView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+User = get_user_model()
+
+
+class GoogleLoginView(APIView):
+    def post(self, request):
+        """
+        Logowanie użytkownika za pomocą tokena Google OAuth2 i zwracanie JWT.
+        """
+        token = request.data.get("token")
+
+        if not token:
+            return Response(
+                {"error": "Brak tokena"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Weryfikacja tokena Google
+        google_url = f"https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={token}"
+        google_response = requests.get(google_url)
+
+        if google_response.status_code != 200:
+            return Response(
+                {"error": "Nieprawidłowy token"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        google_data = loads(google_response.text)
+        email = google_data.get("email")
+
+        if not email:
+            return Response(
+                {"error": "Brak emaila w odpowiedzi Google"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Sprawdzenie, czy użytkownik istnieje
+        user, created = User.objects.get_or_create(
+            email=email, defaults={"username": email}
+        )
+
+        # Generowanie tokena JWT
+        refresh = RefreshToken.for_user(user)
+        print(refresh)
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
+        )
