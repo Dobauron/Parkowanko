@@ -10,8 +10,8 @@ class ParkingPointReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ParkingPointReport
-        fields = ["id", "user", "parking_point", "reason", "description", "created_at"]
-        read_only_fields = ["id", "user", "created_at"]
+        fields = ["id", "parking_point", "reason", "description", "created_at"]
+        read_only_fields = ["id", "created_at"]
 
     def validate(self, attrs):
         # Jeśli powód to "other", opis nie może być pusty
