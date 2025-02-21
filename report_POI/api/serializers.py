@@ -4,9 +4,9 @@ from .validators import validate_reason
 
 
 class ParkingPointReportSerializer(serializers.ModelSerializer):
-    reason = serializers.CharField(
-        validators=[validate_reason]
-    )  # Dodajemy walidator do pola
+    reason = serializers.ChoiceField(
+        choices=ParkingPointReport.ReportReason.choices, validators=[validate_reason]
+    )
 
     class Meta:
         model = ParkingPointReport

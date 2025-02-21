@@ -102,7 +102,6 @@ class GoogleLoginView(APIView):
 
         # Generowanie tokena JWT
         refresh = RefreshToken.for_user(user)
-        print(refresh)
         return Response(
             {
                 "refresh": str(refresh),
