@@ -1,5 +1,4 @@
 import pytest
-from rest_framework.exceptions import ValidationError
 from parking_point.api.serializers import ParkingPointSerializer
 from parking_point.models import ParkingPoint
 from django.contrib.auth import get_user_model

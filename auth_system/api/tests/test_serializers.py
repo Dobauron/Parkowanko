@@ -1,6 +1,6 @@
 import pytest
 from ..serializers import RegisterSerializer, ChangePasswordSerializer
-from auth_system.models import Account
+
 
 
 @pytest.mark.django_db
