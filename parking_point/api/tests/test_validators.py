@@ -7,7 +7,7 @@ from parking_point.api.validators import (
     validate_location,
 )
 from parking_point.models import ParkingPoint
-from django.contrib.auth import get_user_model
+from django.contrib import get_user_model
 
 
 @pytest.mark.parametrize(

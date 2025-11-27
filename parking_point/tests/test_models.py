@@ -1,6 +1,6 @@
 import pytest
 from django.utils import timezone
-from django.contrib.auth import get_user_model
+from django.contrib import get_user_model
 from parking_point.models import ParkingPoint
 
 
