@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("parking_point", "0003_alter_parkingpoint_location_alter_parkingpoint_name"),
+        ("parking_points", "0003_alter_parkingpoint_location_alter_parkingpoint_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

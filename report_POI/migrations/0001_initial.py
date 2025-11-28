@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("parking_point", "0004_parkingpoint_user"),
+        ("parking_points", "0004_parkingpoint_user"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -41,11 +41,11 @@ class Migration(migrations.Migration):
                 ("description", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
-                    "parking_point",
+                    "parking_points",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="reports",
-                        to="parking_point.parkingpoint",
+                        to="parking_points.parkingpoint",
                     ),
                 ),
                 (
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "unique_together": {("user", "parking_point")},
+                "unique_together": {("user", "parking_points")},
             },
         ),
     ]
