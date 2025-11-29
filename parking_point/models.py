@@ -22,7 +22,7 @@ class ParkingPoint(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="parking_points",
+        related_name="parking_point",
     )
     # Pole dla szerokości i długości geograficznej
     location = models.JSONField(verbose_name="coordynaty", null=False, blank=False)

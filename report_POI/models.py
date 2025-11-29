@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from parking_points.models import ParkingPoint
+from parking_point.models import ParkingPoint
 
 User = get_user_model()
 

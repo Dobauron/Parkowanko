@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class ParkingPointConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "parking_points"
+    name = "parking_point"

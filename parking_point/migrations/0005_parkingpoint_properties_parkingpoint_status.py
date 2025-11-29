@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("parking_points", "0004_parkingpoint_user"),
+        ("parking_point", "0004_parkingpoint_user"),
     ]
 
     operations = [

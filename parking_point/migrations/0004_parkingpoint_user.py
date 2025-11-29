@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("parking_points", "0003_alter_parkingpoint_location_alter_parkingpoint_name"),
+        ("parking_point", "0003_alter_parkingpoint_location_alter_parkingpoint_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                related_name="parking_points",
+                related_name="parking_point",
                 to=settings.AUTH_USER_MODEL,
             ),
         ),
