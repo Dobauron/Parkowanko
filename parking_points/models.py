@@ -1,6 +1,6 @@
 from django.db import models
 from auth_system.models import Account
-
+from multiselectfield import MultiSelectField
 
 class ParkingPoint(models.Model):
     # Podstawowe metadane
