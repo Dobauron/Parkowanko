@@ -19,7 +19,11 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
     # Walidacja create wykonywana jest w serializerze!!!
     def perform_create(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
-        serializer.save(user=user)
+        serializer.save(user=user, status=1)  # ← TU ustawiasz ACTIVE
+
+    # PUT/PATCH → status = draft
+    def perform_update(self, serializer):
+        serializer.save(status=0)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
