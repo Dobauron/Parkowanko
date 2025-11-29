@@ -10,3 +10,7 @@ class Rank(models.Model):
 
     def __str__(self):
         return self.name
+
+class UserRank(models.Model):
+    rank = models.ForeignKey(Rank, on_delete=models.CASCADE)
+    current_exp = models.PositiveIntegerField(default=0)
