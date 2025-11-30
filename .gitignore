@@ -4,10 +4,7 @@ __pycache__/
 *.sqlite3
 
 # Virtual environment
-.venv/
-env/
-./venv/
-ENV/
+
 venv/
 .env
 staticfiles/
