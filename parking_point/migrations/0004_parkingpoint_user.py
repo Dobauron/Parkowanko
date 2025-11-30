@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                related_name="parking_points",
+                related_name="parking_point",
                 to=settings.AUTH_USER_MODEL,
             ),
         ),

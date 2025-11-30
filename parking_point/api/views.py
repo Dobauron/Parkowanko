@@ -20,7 +20,6 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
         serializer.save(user=user)
-
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
