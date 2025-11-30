@@ -4,6 +4,8 @@ from .validators import validate_location
 
 
 class ParkingPointSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = ParkingPoint
         fields = "__all__"

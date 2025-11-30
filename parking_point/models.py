@@ -10,11 +10,14 @@ class ParkingPoint(models.Model):
         ("ev", "Ładowanie EV"),
         ("paid", "Płatny"),
         ("guarded", "Strzeżony"),
+        ("dangerous_district", "niebezpieczny_rejon"),
     )
-    STATUS_CHOICES = (
-        (0, "Draft"),     # wersja robocza
-        (1, "Active"),    # aktywny
+    OCCUPANCY_CHOICES = (
+        ("HIGH", "high"),
+        ("MEDIUM", "medium"),
+        ("LOW", "low"),
     )
+
     name = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     user = models.ForeignKey(
@@ -27,7 +30,7 @@ class ParkingPoint(models.Model):
     # Pole dla szerokości i długości geograficznej
     location = models.JSONField(verbose_name="coordynaty", null=False, blank=False)
     properties = MultiSelectField(choices=PROPERTY_CHOICES, blank=True, null=True)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    occupancy = models.CharField(choices=OCCUPANCY_CHOICES, max_length=255, blank=True, null=True)
     # Metadane czasowe
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Utworzono")
     updated_at = models.DateTimeField(

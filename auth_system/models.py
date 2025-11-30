@@ -7,7 +7,6 @@ from django.contrib.auth.models import (
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from Ranks.models import UserRank
 
 
 class AccountManager(BaseUserManager):
@@ -44,9 +43,6 @@ class Account(AbstractUser):
     groups = models.ManyToManyField(Group, related_name="account_groups")
     user_permissions = models.ManyToManyField(
         Permission, related_name="account_user_permissions"
-    )
-    rank = models.ForeignKey(
-        UserRank, related_name="account_rank", on_delete=models.CASCADE
     )
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
