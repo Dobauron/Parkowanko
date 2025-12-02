@@ -5,7 +5,9 @@ from ..models import ParkingPoint
 from .serializers import ParkingPointSerializer
 from .validators import validate_location
 from rest_framework.permissions import AllowAny
-
+from Reviews.models import Review
+from Reviews.api.serializers import ReviewSerializer
+from rest_framework.decorators import action
 
 class ParkingPointViewSet(viewsets.ModelViewSet):
     """
@@ -16,10 +18,12 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
     serializer_class = ParkingPointSerializer
     permission_classes = [AllowAny]
 
+
     # Walidacja create wykonywana jest w serializerze!!!
     def perform_create(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
         serializer.save(user=user)
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
@@ -41,4 +45,13 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="reviews")
+    def reviews(self, request, pk=None):
+        """
+        GET /api/parking-points/{id}/reviews/
+        """
+        reviews = Review.objects.filter(parking_point_id=pk)
+        serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
