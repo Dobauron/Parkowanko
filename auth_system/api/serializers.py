@@ -37,3 +37,9 @@ class ChangePasswordSerializer(serializers.Serializer):
         except ValidationError as e:
             raise serializers.ValidationError(e.messages)
         return value
+
+
+class GoogleLoginSerializer(serializers.Serializer):
+    token = serializers.CharField(
+        help_text="Google ID token pozyskany z frontendu (Google Sign-In)."
+    )
