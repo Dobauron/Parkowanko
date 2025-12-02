@@ -2,7 +2,6 @@ import pytest
 from ..serializers import RegisterSerializer, ChangePasswordSerializer
 
 
-
 @pytest.mark.django_db
 class TestRegisterSerializer:
     def test_register_serializer_valid_data(self):

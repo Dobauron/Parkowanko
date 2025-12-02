@@ -1,8 +1,10 @@
 from django.db import models
 from auth_system.models import Account
+
+
 # Create your models here.
 class EventType(models.Model):
-    type= models.CharField(max_length=100)
+    type = models.CharField(max_length=100)
     experience = models.IntegerField()
 
 
