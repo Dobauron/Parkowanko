@@ -10,10 +10,9 @@ class ReviewAdmin(admin.ModelAdmin):
         "parking_point",
         "show_properties",
         "occupancy",
-        "is_liked",
         "created_at",
     )
-    list_filter = ("occupancy", "is_liked", "created_at")
+    list_filter = ("occupancy", "created_at")
     search_fields = (
         "user__username",
         "parking_point__name",
@@ -31,7 +30,6 @@ class ReviewAdmin(admin.ModelAdmin):
                     "parking_point",
                     "properties",
                     "occupancy",
-                    "is_liked",
                     "description",
                     "created_at",
                 )
