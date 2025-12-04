@@ -90,9 +90,11 @@ class ParkingPointEditLocationVoteView(CreateAPIView):
     serializer_class = ParkingPointEditLocationVoteSerializer
 
     def get_serializer_context(self):
+        """
+        metoda która zwraca słownik danych dostępnych w serializerze jako self.context.
+        """
         context = super().get_serializer_context()
         context["parking_point_id"] = self.kwargs["pk"]
-        # ✅ PRZYPISZ OBIEKT DO CONTEXT W WIDOKU:
         proposal = ParkingPointEditLocation.objects.filter(
             parking_point_id=self.kwargs["pk"]
         ).first()
@@ -101,6 +103,7 @@ class ParkingPointEditLocationVoteView(CreateAPIView):
             context['proposal'] = proposal  # <-- PRZYPISANIE!
 
         context['parking_point_id'] = self.kwargs["pk"]
+        context["method"] = self.request.method
         return context
 
     def perform_create(self, serializer):
@@ -126,3 +129,25 @@ class ParkingPointEditLocationVoteView(CreateAPIView):
             user=self.request.user,
             parking_point_edit_location=proposal
         )
+
+    def put(self, request, pk):
+        proposal = get_object_or_404(ParkingPointEditLocation, parking_point_id=pk)
+
+        vote = get_object_or_404(
+            ParkingPointEditLocationVote,
+            parking_point_edit_location=proposal,
+            user=request.user
+        )
+
+        serializer = ParkingPointEditLocationVoteSerializer(
+            vote,
+            data=request.data,
+            partial=True,
+            context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+
+        vote.is_like = serializer.validated_data["is_like"]
+        vote.save(update_fields=["is_like"])
+
+        return Response({"message": "Głos zaktualizowany."}, status=200)

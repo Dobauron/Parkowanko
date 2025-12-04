@@ -181,6 +181,9 @@ def validate_user_not_voted():
             if not request or not request.user.is_authenticated:
                 raise serializers.ValidationError("Musisz być zalogowany.")
 
+            if self.context.get("method") == "PUT":
+                return validate_method(self, attrs)
+
             if not proposal:
                 raise serializers.ValidationError("Brak propozycji w kontekście.")
 
