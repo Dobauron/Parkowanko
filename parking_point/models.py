@@ -21,7 +21,7 @@ class ParkingPoint(models.Model):
         auto_now=True, verbose_name="Ostatnia aktualizacja"
     )
     is_verified = models.BooleanField()
-    has_location_edit_pending = models.BooleanField(default=False)
+    has_proposal = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

@@ -1,30 +1,27 @@
 from rest_framework import serializers
 from ..models import ParkingPointEditLocation, ParkingPointEditLocationVote
+from .validators import validate_distance, validate_no_existing_proposal, validate_location_structure
+
 
 class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = ParkingPointEditLocation
-        fields = [
-            "id",
-            "user",
-            "parking_point",
-            "location",
-            "created_at",
-        ]
-        read_only_fields = ["id", "user", "parking_point", "created_at"]
+        fields = ['id', 'location']
+        read_only_fields = ['id']
 
-        def validate(self, attrs):
-            user = self.context['request'].user
-            parking_point_id = self.context['view'].kwargs.get('pk')
-
-            if not ParkingPoint.objects.filter(pk=parking_point_id).exists():
-                raise serializers.ValidationError({"parking_point": "Nie istnieje taki parking point."})
-
-            if ParkingPointEditLocation.objects.filter(user=user, parking_point_id=parking_point_id).exists():
-                raise serializers.ValidationError(
-                    {"error": "Możesz zaproponować tylko jedną zmianę dla tego parking point."})
-
-            return attrs
+    @validate_location_structure()
+    @validate_no_existing_proposal()
+    @validate_distance(min_distance=20, max_distance=100)
+    def validate(self, attrs):
+        """
+        Kolejność walidacji:
+        1. Czy location ma dobrą strukturę
+        2. Sprawdza has_proposal
+        3. Czy odległość jest w zakresie 20-100m
+        """
+        # Tutaj możesz dodać inne walidacje jeśli potrzebujesz
+        return attrs
 
 class ParkingPointEditLocationVoteSerializer(serializers.ModelSerializer):
     class Meta:
