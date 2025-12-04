@@ -16,21 +16,49 @@ def set_has_proposal_on_create(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=ParkingPointEditLocationVote)
-def check_score(sender, instance, created, **kwargs):
+def apply_vote_effect(sender, instance, created, **kwargs):
+    """
+    Automatyczna logika głosowania:
+    - jeśli like - dislike >= 3 → zmiana lokalizacji w ParkingPoint
+    - jeśli dislike - like >= 3 → usunięcie propozycji
+    """
+
     if not created:
-        return
+        return  # liczy się tylko pierwszy zapis głosu
 
     proposal = instance.parking_point_edit_location
 
-    # Bilans like - dislike
-    score = proposal.score
+    # Liczymy ponownie głosy (żeby uniknąć edge-case)
+    likes = ParkingPointEditLocationVote.objects.filter(
+        parking_point_edit_location=proposal,
+        is_like=True,
+    ).count()
 
-    if score >= 3:
-        # Zaakceptuj
-        proposal.parking_point.location = proposal.location
-        proposal.parking_point.save()
+    dislikes = ParkingPointEditLocationVote.objects.filter(
+        parking_point_edit_location=proposal,
+        is_like=False,
+    ).count()
+
+    # Aktualizujemy liczniki
+    proposal.like_count = likes
+    proposal.dislike_count = dislikes
+    proposal.save(update_fields=["like_count", "dislike_count"])
+
+    # --- LOGIKA DECYZYJNA ---
+
+    # ✔️ 3 like więcej → zatwierdzenie zmiany
+    if likes - dislikes >= 3:
+        pp = proposal.parking_point
+        pp.location = proposal.location
+        pp.has_proposal = False
+        pp.save(update_fields=["location", "has_proposal"])
+
+        # Usuwamy propozycję po zastosowaniu
         proposal.delete()
+        return
 
-    elif score <= -3:
-        # Odrzuć
+    # ✔️ 3 dislike więcej → odrzucenie i kasacja
+    if dislikes - likes >= 3:
+        pp.has_proposal = False
+        pp.save(update_fields=["has_proposal"])
         proposal.delete()

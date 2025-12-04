@@ -100,9 +100,9 @@ class ParkingPointEditLocationVoteView(CreateAPIView):
         ).first()
 
         if proposal:
-            context['proposal'] = proposal  # <-- PRZYPISANIE!
+            context["proposal"] = proposal  # <-- PRZYPISANIE!
 
-        context['parking_point_id'] = self.kwargs["pk"]
+        context["parking_point_id"] = self.kwargs["pk"]
         context["method"] = self.request.method
         return context
 
@@ -112,11 +112,11 @@ class ParkingPointEditLocationVoteView(CreateAPIView):
         Tu przekazujemy user i proposal do save().
         """
         # 1. Znajdź proposal (walidator już go znalazł i zapisał w context)
-        proposal = serializer.context.get('proposal')
+        proposal = serializer.context.get("proposal")
 
         if not proposal:
             # Jeśli walidator nie dodał, znajdź sam
-            parking_point_id = self.kwargs['pk']
+            parking_point_id = self.kwargs["pk"]
             proposal = ParkingPointEditLocation.objects.filter(
                 parking_point_id=parking_point_id
             ).first()
@@ -125,10 +125,7 @@ class ParkingPointEditLocationVoteView(CreateAPIView):
                 raise serializers.ValidationError("Nie znaleziono propozycji.")
 
         # 2. DRF-way: przekaż dodatkowe pola do save()
-        serializer.save(
-            user=self.request.user,
-            parking_point_edit_location=proposal
-        )
+        serializer.save(user=self.request.user, parking_point_edit_location=proposal)
 
     def put(self, request, pk):
         proposal = get_object_or_404(ParkingPointEditLocation, parking_point_id=pk)
@@ -136,14 +133,11 @@ class ParkingPointEditLocationVoteView(CreateAPIView):
         vote = get_object_or_404(
             ParkingPointEditLocationVote,
             parking_point_edit_location=proposal,
-            user=request.user
+            user=request.user,
         )
 
         serializer = ParkingPointEditLocationVoteSerializer(
-            vote,
-            data=request.data,
-            partial=True,
-            context=self.get_serializer_context()
+            vote, data=request.data, partial=True, context=self.get_serializer_context()
         )
         serializer.is_valid(raise_exception=True)
 

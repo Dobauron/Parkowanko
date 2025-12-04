@@ -209,7 +209,6 @@ def validate_proposal_exists():
         def wrapper(self, attrs):
             proposal = self.context.get("proposal")
 
-
             if not proposal:
                 raise serializers.ValidationError("Brak propozycji.")
 

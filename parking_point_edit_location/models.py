@@ -13,16 +13,11 @@ class ParkingPointEditLocation(models.Model):
     location = models.JSONField(verbose_name="coordynaty", null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    like_count = models.PositiveIntegerField(default=0)
+    dislike_count = models.PositiveIntegerField(default=0)
+
     def __str__(self):
         return f"{self.user} want edit ParkingPoint id = {self.parking_point}"
-
-    @property
-    def score(self):
-        """Bilans like - dislike"""
-        return (
-            self.votes.filter(is_like=True).count()
-            - self.votes.filter(is_like=False).count()
-        )
 
 
 class ParkingPointEditLocationVote(models.Model):
