@@ -21,10 +21,10 @@ def validate_choice(value, choices, field_name="value", allow_null=False):
     return value
 
 
-def validate_property(value):
+def validate_attribiutes(value):
     return validate_choice(
         value=value,
-        choices=Review.Property.choices,
+        choices=Review.Attribiutes.choices,
         field_name="property",
         allow_null=False,
     )

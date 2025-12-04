@@ -55,35 +55,6 @@ def validate_proximity_to_existing_points(new_lat, new_lng, exclude_id=None):
             )
 
 
-def validate_distance_from_current_location(new_lat, new_lng, exclude_id, max_distance):
-    """
-    Sprawdza, czy nowa lokalizacja nie znajduje się zbyt daleko od obecnej pozycji.
-    """
-    if not isinstance(max_distance, (int, float)) or max_distance < 0:
-        raise ValueError({"error": "Maksymalna odległość musi być dodatnią liczbą."})
-
-    try:
-        current_point = ParkingPoint.objects.get(id=exclude_id)
-    except ParkingPoint.DoesNotExist:
-        raise ValidationError(
-            {"error": f"Punkt parkingowy o ID {exclude_id} nie istnieje."}
-        )
-
-    try:
-        current_lat = float(current_point.location.get("lat", 0))
-        current_lng = float(current_point.location.get("lng", 0))
-    except (KeyError, ValueError):
-        raise ValidationError({"error": "Błąd w danych lokalizacji obecnego punktu."})
-
-    current_distance = haversine(new_lat, new_lng, current_lat, current_lng)
-    if current_distance > max_distance:
-        raise ValidationError(
-            {
-                "error": f"Nowa lokalizacja jest zbyt oddalona od obecnej pozycji: {current_distance:.2f}m (maksymalnie {max_distance}m)."
-            }
-        )
-
-
 def validate_location(new_lat, new_lng, exclude_id=None, max_distance=None):
     """
     Walidacja lokalizacji punktu parkingowego:
