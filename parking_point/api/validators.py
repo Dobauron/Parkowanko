@@ -55,7 +55,6 @@ def validate_proximity_to_existing_points(new_lat, new_lng, exclude_id=None):
             )
 
 
-
 def validate_location(new_lat, new_lng, exclude_id=None, max_distance=None):
     """
     Walidacja lokalizacji punktu parkingowego:
@@ -71,4 +70,3 @@ def validate_location(new_lat, new_lng, exclude_id=None, max_distance=None):
         validate_distance_from_current_location(
             new_lat, new_lng, exclude_id, max_distance
         )
-

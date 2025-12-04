@@ -2,11 +2,16 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from django.db import IntegrityError
 from ..models import ParkingPointEditLocation, ParkingPointEditLocationVote
-from .serializers import ParkingPointEditLocationSerializer, ParkingPointEditLocationVoteSerializer
+from .serializers import (
+    ParkingPointEditLocationSerializer,
+    ParkingPointEditLocationVoteSerializer,
+)
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView
+from rest_framework.views import APIView
 from parking_point.models import ParkingPoint
 from django.shortcuts import get_object_or_404
+
 
 class ParkingPointEditLocationView(CreateAPIView):
     serializer_class = ParkingPointEditLocationSerializer
@@ -14,7 +19,7 @@ class ParkingPointEditLocationView(CreateAPIView):
 
     def get_parking_point(self):
         """Pobiera parking point na podstawie pk z URL"""
-        pk = self.kwargs.get('pk')
+        pk = self.kwargs.get("pk")
         return get_object_or_404(ParkingPoint, pk=pk)
 
     def get(self, request, *args, **kwargs):
@@ -25,25 +30,30 @@ class ParkingPointEditLocationView(CreateAPIView):
 
         try:
             edit_location = ParkingPointEditLocation.objects.get(
-                user=request.user,
-                parking_point=parking_point
+                user=request.user, parking_point=parking_point
             )
             serializer = self.get_serializer(edit_location)
 
-            return Response({
-                "has_proposal": True,
-                "proposal": serializer.data,
-                "created_at": edit_location.created_at,
-                "parking_point_id": parking_point.id
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "has_proposal": True,
+                    "proposal": serializer.data,
+                    "created_at": edit_location.created_at,
+                    "parking_point_id": parking_point.id,
+                },
+                status=status.HTTP_200_OK,
+            )
 
         except ParkingPointEditLocation.DoesNotExist:
-            return Response({
-                "has_proposal": False,
-                "message": "Nie masz jeszcze propozycji edycji dla tego punktu.",
-                "parking_point_id": parking_point.id,
-                "current_location": parking_point.location
-            }, status=status.HTTP_200_OK)  # 200 zamiast 404, bo to nie jest błąd
+            return Response(
+                {
+                    "has_proposal": False,
+                    "message": "Nie masz jeszcze propozycji edycji dla tego punktu.",
+                    "parking_point_id": parking_point.id,
+                    "current_location": parking_point.location,
+                },
+                status=status.HTTP_200_OK,
+            )  # 200 zamiast 404, bo to nie jest błąd
 
     def post(self, request, *args, **kwargs):
         """
@@ -53,10 +63,7 @@ class ParkingPointEditLocationView(CreateAPIView):
 
         serializer = self.get_serializer(
             data=request.data,
-            context={
-                'request': request,
-                'parking_point': parking_point
-            }
+            context={"request": request, "parking_point": parking_point},
         )
         serializer.is_valid(raise_exception=True)
 
@@ -65,20 +72,57 @@ class ParkingPointEditLocationView(CreateAPIView):
 
         headers = self.get_success_headers(serializer.data)
         return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED,
-            headers=headers
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
     def perform_create(self, serializer):
         """Dodaje user i parking_point przed zapisem"""
+        serializer.save(user=self.request.user, parking_point=self.get_parking_point())
+
+
+class ParkingPointEditLocationVoteView(CreateAPIView):
+    """
+    Głosowanie na AKTYWNĄ propozycję dla danego ParkingPoint
+    POST /api/parking-points/<int:pk>/edit-location/vote/
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ParkingPointEditLocationVoteSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["parking_point_id"] = self.kwargs["pk"]
+        # ✅ PRZYPISZ OBIEKT DO CONTEXT W WIDOKU:
+        proposal = ParkingPointEditLocation.objects.filter(
+            parking_point_id=self.kwargs["pk"]
+        ).first()
+
+        if proposal:
+            context['proposal'] = proposal  # <-- PRZYPISANIE!
+
+        context['parking_point_id'] = self.kwargs["pk"]
+        return context
+
+    def perform_create(self, serializer):
+        """
+        CreateAPIView automatycznie wywoła tę metodę po walidacji.
+        Tu przekazujemy user i proposal do save().
+        """
+        # 1. Znajdź proposal (walidator już go znalazł i zapisał w context)
+        proposal = serializer.context.get('proposal')
+
+        if not proposal:
+            # Jeśli walidator nie dodał, znajdź sam
+            parking_point_id = self.kwargs['pk']
+            proposal = ParkingPointEditLocation.objects.filter(
+                parking_point_id=parking_point_id
+            ).first()
+
+            if not proposal:
+                raise serializers.ValidationError("Nie znaleziono propozycji.")
+
+        # 2. DRF-way: przekaż dodatkowe pola do save()
         serializer.save(
             user=self.request.user,
-            parking_point=self.get_parking_point()
+            parking_point_edit_location=proposal
         )
-#
-# class ParkingPointEditLocationVoteViewSet(viewsets.ModelViewSet):
-#     queryset = ParkingPointEditLocationVote.objects.all()
-#     serializer_class = ParkingPointEditLocationVoteSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-#     http_method_names = ['get', 'post']

@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from parking_point.models import ParkingPoint
 from django.contrib.auth import get_user_model
 from django.db import transaction
+
 User = get_user_model()
 
 
@@ -45,6 +46,3 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user} zgłosił {self.parking_point}"
-
-
-

@@ -4,6 +4,7 @@ from multiselectfield import MultiSelectField
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
 
+
 class ParkingPoint(models.Model):
     user = models.ForeignKey(
         Account,
@@ -24,4 +25,4 @@ class ParkingPoint(models.Model):
     has_proposal = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.name
+        return str(self.id)

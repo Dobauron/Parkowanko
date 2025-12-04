@@ -42,4 +42,3 @@ class ReviewAdmin(admin.ModelAdmin):
         if not obj.properties:
             return "—"
         return ", ".join(obj.properties)
-

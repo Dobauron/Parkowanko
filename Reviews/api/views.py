@@ -5,11 +5,12 @@ from .serializers import ReviewSerializer
 from django.db import IntegrityError
 from rest_framework.generics import ListAPIView
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
-    http_method_names = ["get","post","put"]
+    http_method_names = ["get", "post", "put"]
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -17,9 +18,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         try:
             serializer.save(user=user)
         except IntegrityError:
-            raise ValidationError(
-                {"error": "Już zgłosiłeś to miejsce."}
-            )
+            raise ValidationError({"error": "Już zgłosiłeś to miejsce."})
 
 
 class ParkingPointReviewsList(ListAPIView):
@@ -27,4 +26,3 @@ class ParkingPointReviewsList(ListAPIView):
 
     def get_queryset(self):
         return Review.objects.filter(parking_point_id=self.kwargs["pk"])
-
