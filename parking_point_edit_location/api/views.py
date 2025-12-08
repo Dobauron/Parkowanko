@@ -30,7 +30,7 @@ class ParkingPointEditLocationView(CreateAPIView):
 
         try:
             edit_location = ParkingPointEditLocation.objects.get(
-                user=request.user, parking_point=parking_point
+                parking_point=parking_point
             )
             serializer = self.get_serializer(edit_location)
 
@@ -77,6 +77,9 @@ class ParkingPointEditLocationView(CreateAPIView):
 
     def perform_create(self, serializer):
         """Dodaje user i parking_point przed zapisem"""
+        parking_point = self.get_parking_point()
+        if ParkingPointEditLocation.objects.filter(parking_point=parking_point).exists():
+            raise ValidationError({"error": "Ta lokalizacja ma już propozycję edycji."})
         serializer.save(user=self.request.user, parking_point=self.get_parking_point())
 
 

@@ -82,7 +82,7 @@ def validate_location_structure():
 def validate_no_existing_proposal():
     """
     Waliduje czy już istnieje jakakolwiek propozycja edycji dla tego parking point
-    (sprawdza pole has_proposal w ParkingPoint)
+    (sprawdza pole has_edit_location_proposal w ParkingPoint)
     """
 
     def decorator(validate_method):
@@ -94,8 +94,8 @@ def validate_no_existing_proposal():
                     {"parking_point": "Parking point jest wymagany w kontekście."}
                 )
 
-            # ✅ POPRAWNE: Sprawdzamy flagę has_proposal w ParkingPoint
-            if parking_point.has_proposal:
+            # ✅ POPRAWNE: Sprawdzamy flagę has_edit_location_proposal w ParkingPoint
+            if parking_point.has_edit_location_proposal:
                 raise serializers.ValidationError(
                     {
                         "parking_point": "Dla tego punktu parkingowego już złożono propozycję edycji lokalizacji. "

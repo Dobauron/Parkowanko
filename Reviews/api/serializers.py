@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ..models import Review
-from .validators import validate_attribiutes, validate_occupancy
+from .validators import validate_attribiutes, validate_occupancy, validate_unique_review, validate_no_profanity
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -17,36 +17,23 @@ class ReviewSerializer(serializers.ModelSerializer):
         allow_null=True,
         allow_blank=True,
     )
-
+    description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        validators=[validate_no_profanity],
+    )
     class Meta:
         model = Review
         fields = [
-            "id",
-            "parking_point",
+            "parking_point_id",
             "attribiutes",
             "occupancy",
             "description",
             "created_at",
+            "is_like"
         ]
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["created_at", "parking_point_id"]
 
+    @validate_unique_review
     def validate(self, attrs):
-        # Jeśli użytkownik wybrał OTHER, opis musi być uzupełniony
-        properties = attrs.get("attribiutes", [])
-        if "OTHER" in properties and not attrs.get("description"):
-            raise serializers.ValidationError(
-                {"description": "Opis jest wymagany, gdy wybrano 'Inne'."}
-            )
-
-        # Walidacja: jeden Review na użytkownika / parking_point
-        user = self.context["request"].user
-        parking_point = attrs.get("parking_point")
-        if self.instance is None:  # tylko przy tworzeniu
-            if Review.objects.filter(user=user, parking_point=parking_point).exists():
-                raise serializers.ValidationError(
-                    {
-                        "detail": "Możesz dodać tylko jedną recenzję dla tego parking point."
-                    }
-                )
-
         return attrs
