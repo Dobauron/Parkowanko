@@ -4,10 +4,5 @@ from .views import ReviewAPICreateListView
 
 
 urlpatterns = [
-    path(
-        "",
-        ReviewAPICreateListView.as_view(),
-        name="review"
-    ),
-    ]
-
+    path("", ReviewAPICreateListView.as_view(), name="review"),
+]

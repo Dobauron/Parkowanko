@@ -10,8 +10,8 @@ def set_has_proposal_on_create(sender, instance, created, **kwargs):
     """
     if created:
         parking_point = instance.parking_point
-        if not parking_point.has_proposal:
-            parking_point.has_proposal = True
+        if not parking_point.has_edit_location_proposal:
+            parking_point.has_edit_location_proposal = True
             parking_point.save(update_fields=["has_edit_location_proposal"])
 
 
@@ -45,20 +45,17 @@ def apply_vote_effect(sender, instance, created, **kwargs):
     proposal.save(update_fields=["like_count", "dislike_count"])
 
     # --- LOGIKA DECYZYJNA ---
-
+    pp = proposal.parking_point
     # ✔️ 3 like więcej → zatwierdzenie zmiany
+    # 1️⃣ decyzja o lokalizacji
     if likes - dislikes >= 3:
-        pp = proposal.parking_point
         pp.location = proposal.location
-        pp.has_edit_location_proposal = False
-        pp.save(update_fields=["location", "has_edit_location_proposal"])
-
-        # Usuwamy propozycję po zastosowaniu
         proposal.delete()
-        return
-
-    # ✔️ 3 dislike więcej → odrzucenie i kasacja
-    if dislikes - likes >= 3:
-        pp.has_edit_location_proposal = False
-        pp.save(update_fields=["has_edit_location_proposal"])
+    elif dislikes - likes >= 3:
         proposal.delete()
+
+    # 2️⃣ aktualizacja flagi w osobnym bloku
+    pp.has_edit_location_proposal = ParkingPointEditLocation.objects.filter(
+        parking_point=pp
+    ).exists()
+    pp.save(update_fields=["location", "has_edit_location_proposal"])

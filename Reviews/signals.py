@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from .models import Review
 from parking_point.models import ParkingPoint
 
+
 @receiver(post_save, sender=Review)
 def verify_parking_point_on_likes(sender, instance, created, **kwargs):
     """
@@ -16,8 +17,7 @@ def verify_parking_point_on_likes(sender, instance, created, **kwargs):
 
     # Policz pozytywne recenzje
     like_count = Review.objects.filter(
-        parking_point=parking_point,
-        is_like=True
+        parking_point=parking_point, is_like=True
     ).count()
 
     if like_count >= 2 and not parking_point.is_verified:

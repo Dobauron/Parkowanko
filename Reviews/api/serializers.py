@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from ..models import Review
-from .validators import validate_attribiutes, validate_occupancy, validate_unique_review, validate_no_profanity
+from .validators import (
+    validate_attribiutes,
+    validate_occupancy,
+    validate_unique_review,
+    validate_no_profanity,
+)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -22,6 +27,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         allow_blank=True,
         validators=[validate_no_profanity],
     )
+
     class Meta:
         model = Review
         fields = [
@@ -30,7 +36,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "occupancy",
             "description",
             "created_at",
-            "is_like"
+            "is_like",
         ]
         read_only_fields = ["created_at", "parking_point_id"]
 

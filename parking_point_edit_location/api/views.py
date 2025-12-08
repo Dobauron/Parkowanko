@@ -78,9 +78,17 @@ class ParkingPointEditLocationView(CreateAPIView):
     def perform_create(self, serializer):
         """Dodaje user i parking_point przed zapisem"""
         parking_point = self.get_parking_point()
-        if ParkingPointEditLocation.objects.filter(parking_point=parking_point).exists():
-            raise ValidationError({"error": "Ta lokalizacja ma już propozycję edycji."})
-        serializer.save(user=self.request.user, parking_point=self.get_parking_point())
+        # Zapis propozycji
+        edit_location = serializer.save(
+            user=self.request.user, parking_point=parking_point
+        )
+
+        # Tworzymy automatycznie vote z is_like=None
+        ParkingPointEditLocationVote.objects.create(
+            user=self.request.user,
+            parking_point_edit_location=edit_location,
+            is_like=None,
+        )
 
 
 class ParkingPointEditLocationVoteView(CreateAPIView):

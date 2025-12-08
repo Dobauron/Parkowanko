@@ -4,7 +4,7 @@ from .validators import (
     validate_distance,
     validate_no_existing_proposal,
     validate_location_structure,
-    validate_has_proposal,
+    validate_has_edit_location_proposal,
     validate_proposal_exists,
     validate_user_not_voted,
 )
@@ -36,7 +36,7 @@ class ParkingPointEditLocationVoteSerializer(serializers.ModelSerializer):
         model = ParkingPointEditLocationVote
         fields = ["is_like"]
 
-    @validate_has_proposal()
+    @validate_has_edit_location_proposal()
     @validate_proposal_exists()
     @validate_user_not_voted()
     def validate(self, attrs):

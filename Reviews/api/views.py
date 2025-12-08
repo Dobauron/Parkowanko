@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from parking_point.models import ParkingPoint
 
+
 class ReviewAPICreateListView(ListCreateAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer

@@ -25,7 +25,7 @@ class ParkingPointEditLocationVote(models.Model):
         ParkingPointEditLocation, on_delete=models.CASCADE, related_name="votes"
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    is_like = models.BooleanField(default=False)
+    is_like = models.BooleanField(default=False, null=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

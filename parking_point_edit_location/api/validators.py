@@ -223,7 +223,7 @@ def validate_proposal_exists():
     return decorator
 
 
-def validate_has_proposal():
+def validate_has_edit_location_proposal():
     """
     Waliduje czy parking point ma aktywną propozycję
     """
@@ -237,8 +237,8 @@ def validate_has_proposal():
                     "Ten punkt nie ma aktywnej propozycji."
                 )
 
-            # Sprawdź czy parking point ma flagę has_proposal
-            if not proposal.parking_point.has_proposal:
+            # Sprawdź czy parking point ma flagę has_edit_location_proposal
+            if not proposal.parking_point.has_edit_location_proposal:
                 raise serializers.ValidationError("Propozycja jest nieaktywna.")
 
             return validate_method(self, attrs)

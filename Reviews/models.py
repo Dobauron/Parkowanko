@@ -10,20 +10,20 @@ User = get_user_model()
 
 class Review(models.Model):
     class Attribiutes(models.TextChoices):
-        FREE_OFF_SEASON = 'FREE_OFF_SEASON', _("Darmowy poza sezonem")
-        DANGEROUS_AREA = 'DANGEROUS_AREA', _("Niebezpieczna okolica")
-        POOR_SURFACE = 'POOR_SURFACE', _("Zła nawierzchnia")
-        HARD_ACCESS = 'HARD_ACCESS', _("Trudny dostęp")
-        FLOOD_PRONE = 'FLOOD_PRONE', _("Podatny na podtopienia")
-        POOR_LIGHTING = 'POOR_LIGHTING', _("Słabe oświetlenie")
-        PARKING_RESTRICTIONS = 'PARKING_RESTRICTIONS', _("Ograniczenia parkingowe")
+        FREE_OFF_SEASON = "FREE_OFF_SEASON", _("Darmowy poza sezonem")
+        DANGEROUS_AREA = "DANGEROUS_AREA", _("Niebezpieczna okolica")
+        POOR_SURFACE = "POOR_SURFACE", _("Zła nawierzchnia")
+        HARD_ACCESS = "HARD_ACCESS", _("Trudny dostęp")
+        FLOOD_PRONE = "FLOOD_PRONE", _("Podatny na podtopienia")
+        POOR_LIGHTING = "POOR_LIGHTING", _("Słabe oświetlenie")
+        PARKING_RESTRICTIONS = "PARKING_RESTRICTIONS", _("Ograniczenia parkingowe")
 
     class Occupancy(models.TextChoices):
-        HIGH = 'HIGH', _("Wysokie")
-        MEDIUM = 'MEDIUM', _("Średnie")
-        LOW = 'LOW', _("Niskie")
-        NO_SPACE = 'NO_SPACE', _("Brak miejsca")
-        NO_DATA = 'NO_DATA', _("Brak danych")
+        HIGH = "HIGH", _("Wysokie")
+        MEDIUM = "MEDIUM", _("Średnie")
+        LOW = "LOW", _("Niskie")
+        NO_SPACE = "NO_SPACE", _("Brak miejsca")
+        NO_DATA = "NO_DATA", _("Brak danych")
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     parking_point = models.ForeignKey(
@@ -41,7 +41,7 @@ class Review(models.Model):
     occupancy = models.CharField(
         null=True, blank=True, max_length=255, choices=Occupancy.choices
     )
-    is_like = models.BooleanField(default=None,null=True,blank=True)
+    is_like = models.BooleanField(default=None, null=True, blank=True)
 
     class Meta:
         unique_together = (
