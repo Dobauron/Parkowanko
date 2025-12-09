@@ -18,47 +18,35 @@ class ParkingPointEditLocationView(CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_parking_point(self):
-        """Pobiera parking point na podstawie pk z URL"""
         pk = self.kwargs.get("pk")
         return get_object_or_404(ParkingPoint, pk=pk)
 
+    #
+    # --------- GET ----------
+    #
     def get(self, request, *args, **kwargs):
-        """
-        GET: Sprawdza czy użytkownik ma już propozycję edycji
-        """
         parking_point = self.get_parking_point()
 
         try:
-            edit_location = ParkingPointEditLocation.objects.get(
-                user=request.user, parking_point=parking_point
-            )
-            serializer = self.get_serializer(edit_location)
-
-            return Response(
-                {
-                    "has_proposal": True,
-                    "proposal": serializer.data,
-                    "created_at": edit_location.created_at,
-                    "parking_point_id": parking_point.id,
-                },
-                status=status.HTTP_200_OK,
-            )
+            obj = ParkingPointEditLocation.objects.get(parking_point=parking_point)
+            serializer = self.get_serializer(obj)
+            return Response(serializer.data, status=200)
 
         except ParkingPointEditLocation.DoesNotExist:
-            return Response(
-                {
-                    "has_proposal": False,
-                    "message": "Nie masz jeszcze propozycji edycji dla tego punktu.",
-                    "parking_point_id": parking_point.id,
-                    "current_location": parking_point.location,
-                },
-                status=status.HTTP_200_OK,
-            )  # 200 zamiast 404, bo to nie jest błąd
+            # ❗ Zwracamy pusty, ale SPÓJNY format
+            data = {
+                "id": None,
+                "coords": None,
+                "parkingId": parking_point.id,
+                "like_count": 0,
+                "dislike_count": 0,
+            }
+            return Response(data, status=200)
 
+    #
+    # --------- POST ----------
+    #
     def post(self, request, *args, **kwargs):
-        """
-        POST: Tworzy nową propozycję edycji lokalizacji
-        """
         parking_point = self.get_parking_point()
 
         serializer = self.get_serializer(
@@ -67,17 +55,20 @@ class ParkingPointEditLocationView(CreateAPIView):
         )
         serializer.is_valid(raise_exception=True)
 
-        # Użyj perform_create aby automatycznie dodać user i parking_point
-        self.perform_create(serializer)
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        obj = serializer.save(
+            user=request.user,
+            parking_point=parking_point
         )
 
-    def perform_create(self, serializer):
-        """Dodaje user i parking_point przed zapisem"""
-        serializer.save(user=self.request.user, parking_point=self.get_parking_point())
+        # Tworzymy automatycznie vote z is_like=None
+        ParkingPointEditLocationVote.objects.create(
+            user=request.user,
+            parking_point_edit_location=obj,
+            is_like=None,
+        )
+
+        # Zwracamy te same dane co GET
+        return Response(self.get_serializer(obj).data, status=201)
 
 
 class ParkingPointEditLocationVoteView(CreateAPIView):

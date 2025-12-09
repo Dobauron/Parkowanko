@@ -4,18 +4,33 @@ from .validators import (
     validate_distance,
     validate_no_existing_proposal,
     validate_location_structure,
-    validate_has_proposal,
+    validate_has_edit_location_proposal,
     validate_proposal_exists,
     validate_user_not_voted,
 )
 
 
 class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
+    parkingId = serializers.IntegerField(source="parking_point.id", read_only=True)
+    like_count = serializers.SerializerMethodField()
+    dislike_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ParkingPointEditLocation
-        fields = ["id", "location"]
-        read_only_fields = ["id"]
+        fields = [
+            "id",
+            "location",       # JSONField zwracany bezpośrednio
+            "parkingId",
+            "like_count",
+            "dislike_count",
+        ]
+
+    def get_like_count(self, obj):
+        return obj.votes.filter(is_like=True).count()
+
+    def get_dislike_count(self, obj):
+        return obj.votes.filter(is_like=False).count()
+
 
     @validate_location_structure()
     @validate_no_existing_proposal()
@@ -36,7 +51,7 @@ class ParkingPointEditLocationVoteSerializer(serializers.ModelSerializer):
         model = ParkingPointEditLocationVote
         fields = ["is_like"]
 
-    @validate_has_proposal()
+    @validate_has_edit_location_proposal()
     @validate_proposal_exists()
     @validate_user_not_voted()
     def validate(self, attrs):

@@ -9,7 +9,14 @@ class ParkingPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParkingPoint
         fields = "__all__"
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+            "is_verified",
+            "user",
+            "has_edit_location_proposal",
+        )
 
     def validate(self, attrs):
         # Pobierz dane lokalizacji

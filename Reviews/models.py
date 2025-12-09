@@ -10,17 +10,20 @@ User = get_user_model()
 
 class Review(models.Model):
     class Attribiutes(models.TextChoices):
-        DIRTY = "DIRTY", _("Brudny")
-        FULL = "FULL", _("Przepełniony")
-        DAMAGED = "DAMAGED", _("Uszkodzony")
-        UNSAFE = "UNSAFE", _("Niebezpieczny")
-        OTHER = "OTHER", _("Inne")
+        FREE_OFF_SEASON = "FREE_OFF_SEASON", _("Darmowy poza sezonem")
+        DANGEROUS_AREA = "DANGEROUS_AREA", _("Niebezpieczna okolica")
+        POOR_SURFACE = "POOR_SURFACE", _("Zła nawierzchnia")
+        HARD_ACCESS = "HARD_ACCESS", _("Trudny dostęp")
+        FLOOD_PRONE = "FLOOD_PRONE", _("Podatny na podtopienia")
+        POOR_LIGHTING = "POOR_LIGHTING", _("Słabe oświetlenie")
+        PARKING_RESTRICTIONS = "PARKING_RESTRICTIONS", _("Ograniczenia parkingowe")
 
     class Occupancy(models.TextChoices):
-        FREE = "FREE", _("Wolne")
-        LIMITED = "LIMITED", _("Mało miejsc")
-        FULL = "FULL", _("Brak miejsc")
-        UNKNOWN = "UNKNOWN", _("Nieznane")
+        HIGH = "HIGH", _("Wysokie")
+        MEDIUM = "MEDIUM", _("Średnie")
+        LOW = "LOW", _("Niskie")
+        NO_SPACE = "NO_SPACE", _("Brak miejsca")
+        NO_DATA = "NO_DATA", _("Brak danych")
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     parking_point = models.ForeignKey(
@@ -29,6 +32,7 @@ class Review(models.Model):
     description = models.TextField(blank=True, null=True)  # Tylko dla "Inne"
     attribiutes = ArrayField(
         models.CharField(max_length=20, choices=Attribiutes.choices),
+        null=True,
         default=list,
         blank=True,
         help_text=_("Lista właściwości, które użytkownik zgłasza."),
@@ -37,6 +41,7 @@ class Review(models.Model):
     occupancy = models.CharField(
         null=True, blank=True, max_length=255, choices=Occupancy.choices
     )
+    is_like = models.BooleanField()
 
     class Meta:
         unique_together = (

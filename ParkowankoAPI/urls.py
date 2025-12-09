@@ -27,8 +27,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", include("auth_system.api.urls")),
     path("api/parkings/", include("parking_point.api.urls")),
-    path("api/parkings/", include("parking_point_edit_location.api.urls")),
-    path("api/reviews/", include("Reviews.api.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/",
