@@ -34,14 +34,7 @@ class ParkingPointEditLocationView(CreateAPIView):
 
         except ParkingPointEditLocation.DoesNotExist:
             # ❗ Zwracamy pusty, ale SPÓJNY format
-            data = {
-                "id": None,
-                "coords": None,
-                "parkingId": parking_point.id,
-                "like_count": 0,
-                "dislike_count": 0,
-            }
-            return Response(data, status=200)
+            return Response(data, status=404)
 
     #
     # --------- POST ----------
