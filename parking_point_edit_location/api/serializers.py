@@ -11,11 +11,26 @@ from .validators import (
 
 
 class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
+    parkingId = serializers.IntegerField(source="parking_point.id", read_only=True)
+    like_count = serializers.SerializerMethodField()
+    dislike_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ParkingPointEditLocation
-        fields = ["id", "location"]
-        read_only_fields = ["id"]
+        fields = [
+            "id",
+            "location",       # JSONField zwracany bezpośrednio
+            "parkingId",
+            "like_count",
+            "dislike_count",
+        ]
+
+    def get_like_count(self, obj):
+        return obj.votes.filter(is_like=True).count()
+
+    def get_dislike_count(self, obj):
+        return obj.votes.filter(is_like=False).count()
+
 
     @validate_location_structure()
     @validate_no_existing_proposal()

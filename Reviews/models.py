@@ -41,7 +41,7 @@ class Review(models.Model):
     occupancy = models.CharField(
         null=True, blank=True, max_length=255, choices=Occupancy.choices
     )
-    is_like = models.BooleanField(default=None, null=True, blank=True)
+    is_like = models.BooleanField()
 
     class Meta:
         unique_together = (
