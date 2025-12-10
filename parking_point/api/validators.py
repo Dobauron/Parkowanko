@@ -1,72 +1,128 @@
+# validators.py
 import math
+import requests
+from functools import wraps
 from rest_framework.exceptions import ValidationError
 from ..models import ParkingPoint
 
 
+# ---------------------------------------------------------
+# Helper – Haversine
+# ---------------------------------------------------------
 def haversine(lat1, lng1, lat2, lng2):
-    """
-    Oblicza odległość Haversine między dwoma punktami geograficznymi w metrach.
-    """
-    R = 6371000  # Promień Ziemi w metrach
+    R = 6371000
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
-    delta_phi = math.radians(lat2 - lat1)
-    delta_lambda = math.radians(lng2 - lng1)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lng2 - lng1)
 
     a = (
-        math.sin(delta_phi / 2) ** 2
-        + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+        math.sin(dphi / 2) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
     )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
     return R * c
 
 
-def validate_proximity_to_existing_points(new_lat, new_lng, exclude_id=None):
-    """
-    Sprawdza, czy nowa lokalizacja znajduje się zbyt blisko istniejących punktów.
-    """
-    try:
-        existing_points = (
-            ParkingPoint.objects.exclude(id=exclude_id)
-            if exclude_id
-            else ParkingPoint.objects.all()
-        )
-    except Exception as e:
-        raise ValidationError(
-            {"error": f"Błąd podczas pobierania istniejących punktów: {str(e)}"}
-        )
+# ---------------------------------------------------------
+# Dekorator 1: poprawna struktura location
+# ---------------------------------------------------------
+def reject_invalid_location_structure(func):
+    @wraps(func)
+    def wrapper(self, location):
+        if not isinstance(location, dict):
+            raise ValidationError("Pole 'location' musi być obiektem JSON.")
 
-    for point in existing_points:
+        if "lat" not in location or "lng" not in location:
+            raise ValidationError("Pole 'location' musi zawierać klucze 'lat' i 'lng'.")
+
         try:
-            existing_lat = float(point.location.get("lat", 0))
-            existing_lng = float(point.location.get("lng", 0))
-        except (KeyError, ValueError):
-            raise ValidationError(
-                {"error": "Błąd w danych lokalizacji istniejących punktów."}
+            float(location["lat"])
+            float(location["lng"])
+        except (ValueError, TypeError):
+            raise ValidationError("Wartości 'lat' i 'lng' muszą być liczbami.")
+
+        return func(self, location)
+
+    return wrapper
+
+
+# ---------------------------------------------------------
+# Dekorator 2: zakaz lokalizacji na wodzie
+# ---------------------------------------------------------
+def reject_water_locations(func):
+    @wraps(func)
+    def wrapper(self, location):
+        lat = float(location["lat"])
+        lng = float(location["lng"])
+
+        url = "https://nominatim.openstreetmap.org/reverse"
+        params = {
+            "lat": lat,
+            "lon": lng,
+            "format": "json",
+            "zoom": 12,
+            "addressdetails": 1,
+        }
+
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                headers={"User-Agent": "parkowanko-app-validator"},
+                timeout=3,
+            )
+            data = response.json()
+        except Exception:
+            raise ValidationError("Nie udało się zweryfikować lokalizacji.")
+
+        if data.get("category") == "water":
+            raise ValidationError("Podana lokalizacja znajduje się na wodzie.")
+
+        if "error" in data:
+            raise ValidationError("Nie udało się zweryfikować lokalizacji.")
+
+        return func(self, location)
+
+    return wrapper
+
+
+# ---------------------------------------------------------
+# Dekorator 3: nie za blisko innych punktów
+# ---------------------------------------------------------
+def reject_too_close_to_other_points(distance_limit=40):
+    """
+    distance_limit – minimalna odległość w metrach
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, location):
+            lat = float(location["lat"])
+            lng = float(location["lng"])
+
+            parking_id = (
+                self.instance.id if hasattr(self, "instance") and self.instance else None
             )
 
-        distance = haversine(new_lat, new_lng, existing_lat, existing_lng)
-        if distance < 40:  # Za blisko innego punktu
-            raise ValidationError(
-                {
-                    "error": f"Nowa lokalizacja znajduje się zbyt blisko istniejącego punktu: {point.name} ({distance:.2f}m)."
-                }
-            )
+            # Pobieramy punkty, ale pomijamy aktualny jeśli edycja
+            qs = ParkingPoint.objects.exclude(id=parking_id)
 
+            for point in qs:
+                try:
+                    lat2 = float(point.location.get("lat"))
+                    lng2 = float(point.location.get("lng"))
+                except Exception:
+                    # Pomijamy zepsute dane
+                    continue
 
-def validate_location(new_lat, new_lng, exclude_id=None, max_distance=None):
-    """
-    Walidacja lokalizacji punktu parkingowego:
-    - Sprawdza, czy punkt znajduje się zbyt blisko innych punktów (100 m).
-    - Opcjonalnie sprawdza, czy punkt nie jest zbyt daleko od swojej obecnej pozycji (max_distance).
-    """
+                dist = haversine(lat, lng, lat2, lng2)
 
-    # Sprawdzenie odległości do innych punktów
-    validate_proximity_to_existing_points(new_lat, new_lng, exclude_id)
+                if dist < distance_limit:
+                    raise ValidationError(
+                        f"Nowa lokalizacja znajduje się zbyt blisko istniejącego punktu ({dist:.2f} m < {distance_limit} m)."
+                    )
 
-    # Sprawdzenie maksymalnej odległości (jeśli dotyczy)
-    if max_distance is not None and exclude_id is not None:
-        validate_distance_from_current_location(
-            new_lat, new_lng, exclude_id, max_distance
-        )
+            return func(self, location)
+        return wrapper
+    return decorator

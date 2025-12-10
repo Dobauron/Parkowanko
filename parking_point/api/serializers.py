@@ -1,6 +1,10 @@
 from rest_framework import serializers
+from .validators import (
+    reject_invalid_location_structure,
+    reject_water_locations,
+    reject_too_close_to_other_points
+)
 from ..models import ParkingPoint
-from .validators import validate_location
 
 
 class ParkingPointSerializer(serializers.ModelSerializer):
@@ -18,24 +22,8 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "has_edit_location_proposal",
         )
 
-    def validate(self, attrs):
-        # Pobierz dane lokalizacji
-        try:
-            new_lat = float(attrs["location"]["lat"])
-            new_lng = float(attrs["location"]["lng"])
-        except (KeyError, ValueError):
-            raise serializers.ValidationError(
-                {
-                    "error": "Nieprawidłowe dane lokalizacji: 'lat' i 'lng' muszą być liczbami."
-                }
-            )
-
-        # Walidacja lokalizacji
-        validate_location(new_lat, new_lng)
-
-        return attrs
-
-    def to_internal_value(self, data):
-        if "location" not in data or not data["location"]:
-            raise serializers.ValidationError({"error": "Pole location jest wymagane."})
-        return super().to_internal_value(data)
+    @reject_invalid_location_structure
+    @reject_water_locations
+    @reject_too_close_to_other_points(distance_limit=40)
+    def validate_location(self, location):
+        return location

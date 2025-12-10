@@ -34,7 +34,7 @@ class ParkingPointEditLocationView(CreateAPIView):
 
         except ParkingPointEditLocation.DoesNotExist:
             # ❗ Zwracamy pusty, ale SPÓJNY format
-            return Response(data, status=404)
+            return Response(status=404)
 
     #
     # --------- POST ----------
