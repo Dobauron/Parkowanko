@@ -48,45 +48,6 @@ def reject_invalid_location_structure(func):
     return wrapper
 
 
-# ---------------------------------------------------------
-# Dekorator 2: zakaz lokalizacji na wodzie
-# ---------------------------------------------------------
-def reject_water_locations(func):
-    @wraps(func)
-    def wrapper(self, location):
-        lat = float(location["lat"])
-        lng = float(location["lng"])
-
-        url = "https://nominatim.openstreetmap.org/reverse"
-        params = {
-            "lat": lat,
-            "lon": lng,
-            "format": "json",
-            "zoom": 12,
-            "addressdetails": 1,
-        }
-
-        try:
-            response = requests.get(
-                url,
-                params=params,
-                headers={"User-Agent": "parkowanko-app-validator"},
-                timeout=3,
-            )
-            data = response.json()
-        except Exception:
-            raise ValidationError("Nie udało się zweryfikować lokalizacji.")
-
-        if data.get("category") == "water":
-            raise ValidationError("Podana lokalizacja znajduje się na wodzie.")
-
-        if "error" in data:
-            raise ValidationError("Nie udało się zweryfikować lokalizacji.")
-
-        return func(self, location)
-
-    return wrapper
-
 
 # ---------------------------------------------------------
 # Dekorator 3: nie za blisko innych punktów

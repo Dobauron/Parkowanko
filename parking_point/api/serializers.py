@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .validators import (
     reject_invalid_location_structure,
-    reject_water_locations,
     reject_too_close_to_other_points
 )
 from ..models import ParkingPoint
@@ -23,7 +22,6 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         )
 
     @reject_invalid_location_structure
-    @reject_water_locations
     @reject_too_close_to_other_points(distance_limit=40)
     def validate_location(self, location):
         return location
