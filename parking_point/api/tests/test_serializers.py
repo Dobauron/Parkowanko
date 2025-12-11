@@ -1,7 +1,7 @@
 import pytest
 from parking_point.api.serializers import ParkingPointSerializer
 from parking_point.models import ParkingPoint
-from django.contrib import get_user_model
+from django.contrib.auth import get_user_model
 
 
 @pytest.mark.django_db

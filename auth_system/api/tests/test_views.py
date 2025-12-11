@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib import get_user_model
+from django.contrib.auth import get_user_model
 
 
 @pytest.mark.django_db

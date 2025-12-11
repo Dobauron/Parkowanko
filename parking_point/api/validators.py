@@ -3,7 +3,7 @@ import math
 import requests
 from functools import wraps
 from rest_framework.exceptions import ValidationError
-from ..models import ParkingPoint
+from parking_point.models import ParkingPoint
 
 
 # ---------------------------------------------------------

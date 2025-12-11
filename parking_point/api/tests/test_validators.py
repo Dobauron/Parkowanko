@@ -1,91 +1,112 @@
 import pytest
 from rest_framework.exceptions import ValidationError
-from parking_point.api.validators import (
+
+from ..validators import (
     haversine,
-    validate_proximity_to_existing_points,
-    validate_distance_from_current_location,
-    validate_location,
+    reject_invalid_location_structure,
+    reject_too_close_to_other_points,
 )
+
 from parking_point.models import ParkingPoint
-from django.contrib import get_user_model
 
 
-@pytest.mark.parametrize(
-    "lat1, lng1, lat2, lng2, expected_distance",
-    [
-        (52.2297, 21.0122, 52.2297, 21.0122, 0),  # Ten sam punkt
-        (52.2297, 21.0122, 52.4064, 16.9252, 278545),  # Warszawa -> Poznań
-        (52.2297, 21.0122, 50.0614, 19.9383, 252289),  # Warszawa -> Kraków
-    ],
-)
-def test_haversine(lat1, lng1, lat2, lng2, expected_distance):
-    """Testuje funkcję Haversine dla różnych odległości"""
-    distance = haversine(lat1, lng1, lat2, lng2)
-    assert pytest.approx(distance, rel=0.01) == expected_distance  # Tolerancja 1%
+
+# ---------------------------------------------------------
+# Test: haversine
+# ---------------------------------------------------------
+def test_haversine_zero_distance():
+    assert haversine(10, 20, 10, 20) == 0
+
+
+def test_haversine_known_distance():
+    # Przybliżona odległość między punktami
+    dist = haversine(52.2296756, 21.0122287, 52.406374, 16.9251681)
+    assert 275000 < dist < 300000  # ~279 km
+
+
+# ---------------------------------------------------------
+# Helper do tworzenia sztucznej walidowanej klasy
+# ---------------------------------------------------------
+class DummySerializer:
+    def __init__(self, instance=None):
+        self.instance = instance
+
+
+# ---------------------------------------------------------
+# Testy: reject_invalid_location_structure
+# ---------------------------------------------------------
+def test_invalid_location_not_dict():
+    @reject_invalid_location_structure
+    def dummy(self, location):
+        return True
+
+    with pytest.raises(ValidationError):
+        dummy(DummySerializer(), "not a dict")
+
+
+def test_invalid_location_missing_keys():
+    @reject_invalid_location_structure
+    def dummy(self, location):
+        return True
+
+    with pytest.raises(ValidationError):
+        dummy(DummySerializer(), {"lat": 10})
+
+
+def test_invalid_location_non_numeric_values():
+    @reject_invalid_location_structure
+    def dummy(self, location):
+        return True
+
+    with pytest.raises(ValidationError):
+        dummy(DummySerializer(), {"lat": "aaa", "lng": 52})
+
+
+def test_valid_location_structure():
+    @reject_invalid_location_structure
+    def dummy(self, location):
+        return True
+
+    assert dummy(DummySerializer(), {"lat": 52, "lng": 21}) is True
+
+
+# ---------------------------------------------------------
+# Testy: reject_too_close_to_other_points
+# ---------------------------------------------------------
+@pytest.mark.django_db
+def test_reject_too_close_to_other_points_raises():
+    # Mamy istniejący punkt
+    ParkingPoint.objects.create(location={"lat": 52.0, "lng": 21.0})
+
+    @reject_too_close_to_other_points(distance_limit=50)
+    def dummy(self, location):
+        return True
+
+    with pytest.raises(ValidationError):
+        dummy(DummySerializer(), {"lat": 52.0001, "lng": 21.0001})  # bardzo blisko
 
 
 @pytest.mark.django_db
-def test_validate_proximity_to_existing_points():
-    """Testuje walidację bliskości lokalizacji"""
-    user = get_user_model().objects.create_user(
-        email="test@example.com", password="testpass"
-    )
+def test_reject_too_close_to_other_points_allows_far_points():
+    ParkingPoint.objects.create(location={"lat": 52.0, "lng": 21.0})
 
-    ParkingPoint.objects.create(
-        name="Existing Point",
-        location={"lat": 52.2297, "lng": 21.0122},
-        user=user,
-    )
+    @reject_too_close_to_other_points(distance_limit=50)
+    def dummy(self, location):
+        return True
 
-    # Próba dodania punktu w tej samej lokalizacji (powinna zwrócić błąd)
-    with pytest.raises(
-        ValidationError,
-        match="Nowa lokalizacja znajduje się zbyt blisko istniejącego punktu",
-    ):
-        validate_proximity_to_existing_points(52.2297, 21.0122)
+    assert dummy(DummySerializer(), {"lat": 53.0, "lng": 22.0}) is True
 
 
 @pytest.mark.django_db
-def test_validate_distance_from_current_location():
-    """Testuje walidację maksymalnej odległości od istniejącego punktu"""
-    user = get_user_model().objects.create_user(
-        email="test@example.com", password="testpass"
-    )
+def test_reject_too_close_ignores_self_when_editing():
+    # Punkt istniejący
+    point = ParkingPoint.objects.create(location={"lat": 52.0, "lng": 21.0})
 
-    parking_point = ParkingPoint.objects.create(
-        name="Current Point",
-        location={"lat": 52.2297, "lng": 21.0122},
-        user=user,
-    )
+    @reject_too_close_to_other_points(distance_limit=50)
+    def dummy(self, location):
+        return True
 
-    # Próba aktualizacji do punktu w odległości 500m (powinna przejść)
-    validate_distance_from_current_location(52.2301, 21.0125, parking_point.id, 1000)
+    # Podczas edycji walidator nie sprawdza punktu przeciwko sobie
+    serializer = DummySerializer(instance=point)
 
-    # Próba aktualizacji do punktu w odległości 2km (powinna zgłosić błąd)
-    with pytest.raises(ValidationError, match="Nowa lokalizacja jest zbyt oddalona"):
-        validate_distance_from_current_location(52.245, 21.025, parking_point.id, 1000)
-
-
-@pytest.mark.django_db
-def test_validate_location():
-    """Testuje walidację lokalizacji"""
-    user = get_user_model().objects.create_user(
-        email="test@example.com", password="testpass"
-    )
-
-    parking_point = ParkingPoint.objects.create(
-        name="Existing Point",
-        location={"lat": 52.2297, "lng": 21.0122},
-        user=user,
-    )
-
-    # Próba dodania nowego punktu w bliskiej odległości (powinna zgłosić błąd)
-    with pytest.raises(
-        ValidationError,
-        match="Nowa lokalizacja znajduje się zbyt blisko istniejącego punktu",
-    ):
-        validate_location(52.2298, 21.0123)
-
-    # Próba aktualizacji punktu na dużą odległość (powinna zgłosić błąd)
-    with pytest.raises(ValidationError, match="Nowa lokalizacja jest zbyt oddalona"):
-        validate_location(52.245, 21.025, parking_point.id, 1000)
+    assert dummy(serializer, {"lat": 52.0, "lng": 21.0}) is True
