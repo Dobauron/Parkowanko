@@ -18,13 +18,20 @@ class RegisterView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        # Generowanie JWT
+        refresh = RefreshToken.for_user(user)
+
         return Response(
             {
                 "user": {
                     "email": user.email,
                     "username": user.username,
                 },
-                "message": "Account created successfully",
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
             },
             status=status.HTTP_201_CREATED,
         )
