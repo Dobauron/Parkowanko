@@ -7,9 +7,8 @@ import requests
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
-
+from auth_system.services.auth import build_auth_response
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
@@ -19,21 +18,9 @@ class RegisterView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # Generowanie JWT
-        refresh = RefreshToken.for_user(user)
-
         return Response(
-            {
-                "user": {
-                    "email": user.email,
-                    "username": user.username,
-                },
-                "tokens": {
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                },
-            },
-            status=status.HTTP_201_CREATED,
+            build_auth_response(user),
+            status=status.HTTP_200_OK
         )
 
 
