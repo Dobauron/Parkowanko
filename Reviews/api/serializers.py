@@ -39,7 +39,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "created_at",
             "is_like",
         ]
-        read_only_fields = ["created_at", "parking_point_id"]
+        read_only_fields = ["id","created_at", "parking_point_id"]
 
     @validate_unique_review
     def validate(self, attrs):

@@ -28,7 +28,6 @@ class RegisterView(generics.GenericAPIView):
                     "email": user.email,
                     "username": user.username,
                 },
-                "message": "Account created successfully",
                 "tokens": {
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
