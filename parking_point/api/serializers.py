@@ -8,6 +8,8 @@ from ..models import ParkingPoint
 
 class ParkingPointSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    like_count = serializers.IntegerField(read_only=True)
+    dislike_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = ParkingPoint
@@ -19,6 +21,8 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "is_verified",
             "user",
             "has_edit_location_proposal",
+            "like_count",
+            "dislike_count",
         )
 
     @reject_invalid_location_structure
