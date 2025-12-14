@@ -25,7 +25,7 @@ class RegisterView(generics.GenericAPIView):
 
         return Response(
             build_auth_response(user),
-            status=status.HTTP_200_OK
+            status=status.HTTP_201_CREATED
         )
 
 
