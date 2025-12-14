@@ -37,6 +37,8 @@ class Account(AbstractUser):
     username = models.CharField(max_length=150)
     email = models.EmailField(_("email address"), unique=True)
     created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    USERNAME_FIELD = "email"
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     objects = AccountManager()
