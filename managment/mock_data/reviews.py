@@ -1,4 +1,4 @@
-from reviews.models import Review
+from Reviews.models import Review
 
 
 def create_reviews(users, parking_points):
@@ -34,7 +34,7 @@ def create_reviews(users, parking_points):
         {
             "user": users["eve"],
             "parking_point": parking_points["krakow_rynek"],
-            "is_like": None,
+            "is_like": False,
             "description": "Ciężko ocenić, różnie bywa.",
         },
 
@@ -42,6 +42,18 @@ def create_reviews(users, parking_points):
         {
             "user": users["alice"],
             "parking_point": parking_points["gdansk_molo"],
+            "is_like": True,
+            "description": "Blisko morza, super miejscówka.",
+        },
+        {
+            "user": users["bob"],
+            "parking_point": parking_points["gdansk_molo"],
+            "is_like": True,
+            "description": "Blisko morza, super miejscówka.",
+        },
+        {
+            "user": users["diana"],
+            "parking_point": parking_points["warszawa_centrum"],
             "is_like": True,
             "description": "Blisko morza, super miejscówka.",
         },

@@ -1,3 +1,5 @@
+from parking_point_edit_location.models import ParkingPointEditLocationVote
+
 def create_edit_location_votes(users, edit_locations):
     """
     Tworzy głosy do propozycji edycji lokalizacji
