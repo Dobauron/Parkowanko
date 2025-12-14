@@ -4,12 +4,12 @@ from rest_framework import status, permissions
 from django.db import connection, transaction
 from django.core.management import call_command
 from django.conf import settings
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny
 from ..mock_data.seed import seed_all
 
 
 class ResetDatabaseMockDataView(APIView):
-    permission_classes = [permissions.IsAdminUser]  # tylko admin
+    permission_classes = [permissions.AllowAny]  # tylko admin
 
     def post(self, request):
         if not settings.DEBUG:
