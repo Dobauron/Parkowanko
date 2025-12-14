@@ -38,6 +38,7 @@ class Review(models.Model):
         help_text=_("Lista właściwości, które użytkownik zgłasza."),
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     occupancy = models.CharField(
         null=True, blank=True, max_length=255, choices=Occupancy.choices
     )

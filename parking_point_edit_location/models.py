@@ -12,7 +12,7 @@ class ParkingPointEditLocation(models.Model):
     )
     location = models.JSONField(verbose_name="coordynaty", null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    updated_at = models.DateTimeField(auto_now=True)
     like_count = models.PositiveIntegerField(default=0)
     dislike_count = models.PositiveIntegerField(default=0)
 
@@ -27,7 +27,7 @@ class ParkingPointEditLocationVote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_like = models.BooleanField(default=False, null=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         unique_together = (
             "parking_point_edit_location",

@@ -2,7 +2,17 @@ from rest_framework import serializers
 from auth_system.models import Account
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        data["id"] = self.user.id
+        data["username"] = self.user.username
+
+        return data
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
