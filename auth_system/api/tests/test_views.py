@@ -19,6 +19,7 @@ class TestRegisterView:
             "/api/auth/register/", data, format="json"
         )  # Dodaj pełną ścieżkę URL
         assert response.status_code == status.HTTP_201_CREATED
+        print(response.data)
         assert response.data["user"]["email"] == data["email"]
         assert response.data["user"]["username"] == data["username"]
 
