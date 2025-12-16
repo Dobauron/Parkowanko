@@ -19,8 +19,6 @@ class TestParkingPointModel:
     def parking_point(self, user):
         """Tworzymy obiekt ParkingPoint powiązany z użytkownikiem"""
         return ParkingPoint.objects.create(
-            name="Test Parking Point",
-            description="Opis testowego punktu parkingowego",
             user=user,
             location={
                 "latitude": 52.2297,
@@ -30,14 +28,9 @@ class TestParkingPointModel:
 
     def test_parking_point_creation(self, parking_point):
         """Test sprawdzający poprawne utworzenie obiektu ParkingPoint"""
-        assert parking_point.name == "Test Parking Point"
-        assert parking_point.description == "Opis testowego punktu parkingowego"
         assert parking_point.user.username == "testuser"
         assert parking_point.location == {"latitude": 52.2297, "longitude": 21.0122}
 
-    def test_parking_point_str_method(self, parking_point):
-        """Test sprawdzający metodę __str__"""
-        assert str(parking_point) == "Test Parking Point"
 
     def test_parking_point_created_at(self, parking_point):
         """Test sprawdzający, czy pole created_at jest automatycznie ustawiane"""
@@ -47,7 +40,7 @@ class TestParkingPointModel:
     def test_parking_point_user_relation(self, parking_point, user):
         """Test sprawdzający, czy relacja z użytkownikiem działa poprawnie"""
         assert parking_point.user == user
-        assert parking_point in user.parking_points.all()
+        assert parking_point in user.parking_point.all()
 
     def test_parking_point_location_field(self, parking_point):
         """Test sprawdzający poprawność działania pola location"""
@@ -59,21 +52,15 @@ class TestParkingPointModel:
     def test_parking_point_blank_fields(self, user):
         """Test sprawdzający działanie pól pustych"""
         parking_point = ParkingPoint.objects.create(
-            name=None,
-            description=None,
             user=None,
             location={"latitude": 52.2297, "longitude": 21.0122},
         )
-        assert parking_point.name is None
-        assert parking_point.description is None
         assert parking_point.user is None
 
     def test_parking_point_location_blank(self):
         """Test sprawdzający działanie pustego pola location"""
         with pytest.raises(ValueError):
             ParkingPoint.objects.create(
-                name="Test Parking Point",
-                description="Opis testowego punktu parkingowego",
                 user=self.user,
                 location=None,
             )

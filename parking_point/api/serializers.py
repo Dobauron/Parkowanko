@@ -29,3 +29,13 @@ class ParkingPointSerializer(serializers.ModelSerializer):
     @reject_too_close_to_other_points(distance_limit=40)
     def validate_location(self, location):
         return location
+
+    #zwraca pola like i dislike w metodzie POST
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+
+        # wstrzykujemy brakujące pola
+        instance.like_count = 0
+        instance.dislike_count = 0
+
+        return instance

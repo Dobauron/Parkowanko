@@ -18,7 +18,7 @@ def user():
 def parking_point(user):
     """Tworzymy przykładowy ParkingPoint dla testów"""
     return ParkingPoint.objects.create(
-        name="Test Point", location={"lat": 52.2297, "lng": 21.0122}, user=user
+        location={"lat": 52.2297, "lng": 21.0122}, user=user
     )
 
 
@@ -37,7 +37,6 @@ def test_get_parking_points(api_client, parking_point):
     assert (
         len(response.data) > 0
     )  # Sprawdzamy, czy w odpowiedzi jest przynajmniej jeden obiekt
-    assert response.data[0]["name"] == parking_point.name
 
 
 @pytest.mark.django_db  # Dodajemy oznaczenie, aby umożliwić dostęp do bazy danych w testach
@@ -45,11 +44,10 @@ def test_get_parking_points(api_client, parking_point):
 def test_create_parking_point(api_client, user):
     """Test sprawdzający utworzenie obiektu ParkingPoint"""
     api_client.force_authenticate(user=user)  # Zaloguj użytkownika
-    data = {"name": "New Parking Point", "location": {"lat": 52.2297, "lng": 21.0122}}
+    data = {"location": {"lat": 52.2297, "lng": 21.0122}}
     response = api_client.post("/api/parkings/", data, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.data["name"] == "New Parking Point"
     assert "location" in response.data
     assert (
         "id" in response.data
@@ -62,7 +60,6 @@ def test_update_parking_point(api_client, parking_point, user):
     """Test sprawdzający aktualizację obiektu ParkingPoint"""
     api_client.force_authenticate(user=user)  # Zaloguj użytkownika
     updated_data = {
-        "name": "Updated Parking Point",
         "location": {"lat": 52.2297, "lng": 21.0},
     }
     response = api_client.patch(
@@ -72,7 +69,6 @@ def test_update_parking_point(api_client, parking_point, user):
     assert (
         response.status_code == status.HTTP_200_OK
     )  # Bad request - 400, gdy dystanse miedzy POI sie nie zgadzają
-    assert response.data["name"] == "Updated Parking Point"
     assert response.data["location"] == updated_data["location"]
     assert (
         response.data["id"] == parking_point.id
@@ -85,7 +81,6 @@ def test_update_parking_point_invalid_location(api_client, parking_point, user):
     """Test sprawdzający nieprawidłowe dane lokalizacji podczas aktualizacji"""
     api_client.force_authenticate(user=user)
     invalid_data = {
-        "name": "Updated Parking Point",
         "location": {"lat": "invalid", "lng": "invalid"},
     }
     response = api_client.put(
@@ -104,7 +99,6 @@ def test_update_parking_point_invalid_location_distance(
     """Test sprawdzający walidację lokalizacji, gdzie odległość przekracza dozwoloną wartość"""
     api_client.force_authenticate(user=user)
     invalid_location_data = {
-        "name": "Updated Parking Point",
         "location": {
             "lat": 52.5000,
             "lng": 21.1000,
