@@ -19,7 +19,7 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
         model = ParkingPointEditLocation
         fields = [
             "id",
-            "location",       # JSONField zwracany bezpośrednio
+            "location",  # JSONField zwracany bezpośrednio
             "parkingId",
             "like_count",
             "dislike_count",
@@ -30,7 +30,6 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
 
     def get_dislike_count(self, obj) -> int:
         return obj.votes.filter(is_like=False).count()
-
 
     @validate_location_structure()
     @validate_no_existing_proposal()

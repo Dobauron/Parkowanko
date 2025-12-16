@@ -48,7 +48,6 @@ def reject_invalid_location_structure(func):
     return wrapper
 
 
-
 # ---------------------------------------------------------
 # Dekorator 3: nie za blisko innych punktów
 # ---------------------------------------------------------
@@ -56,6 +55,7 @@ def reject_too_close_to_other_points(distance_limit=40):
     """
     distance_limit – minimalna odległość w metrach
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(self, location):
@@ -63,7 +63,9 @@ def reject_too_close_to_other_points(distance_limit=40):
             lng = float(location["lng"])
 
             parking_id = (
-                self.instance.id if hasattr(self, "instance") and self.instance else None
+                self.instance.id
+                if hasattr(self, "instance") and self.instance
+                else None
             )
 
             # Pobieramy punkty, ale pomijamy aktualny jeśli edycja
@@ -85,5 +87,7 @@ def reject_too_close_to_other_points(distance_limit=40):
                     )
 
             return func(self, location)
+
         return wrapper
+
     return decorator

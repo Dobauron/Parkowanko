@@ -31,7 +31,6 @@ class TestParkingPointModel:
         assert parking_point.user.username == "testuser"
         assert parking_point.location == {"latitude": 52.2297, "longitude": 21.0122}
 
-
     def test_parking_point_created_at(self, parking_point):
         """Test sprawdzający, czy pole created_at jest automatycznie ustawiane"""
         assert parking_point.created_at is not None

@@ -63,4 +63,3 @@ class ReviewAPICreateListView(ListCreateAPIView):
             serializer.save(user=user, parking_point=parking_point)
         except IntegrityError:
             raise ValidationError({"error": "Już zgłosiłeś to miejsce."})
-

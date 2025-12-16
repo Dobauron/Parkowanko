@@ -1,5 +1,9 @@
 from rest_framework import generics
-from .serializers import RegisterSerializer, ChangePasswordSerializer, CustomTokenObtainPairSerializer
+from .serializers import (
+    RegisterSerializer,
+    ChangePasswordSerializer,
+    CustomTokenObtainPairSerializer,
+)
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from json import loads
@@ -10,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from auth_system.services.auth import build_auth_response
 from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -23,10 +28,7 @@ class RegisterView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        return Response(
-            build_auth_response(user),
-            status=status.HTTP_201_CREATED
-        )
+        return Response(build_auth_response(user), status=status.HTTP_201_CREATED)
 
 
 class ChangePasswordView(APIView):

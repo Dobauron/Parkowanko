@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 class Review(models.Model):
-    class Attribiutes(models.TextChoices):
+    class Attributes(models.TextChoices):
         FREE_OFF_SEASON = "FREE_OFF_SEASON", _("Darmowy poza sezonem")
         DANGEROUS_AREA = "DANGEROUS_AREA", _("Niebezpieczna okolica")
         POOR_SURFACE = "POOR_SURFACE", _("Zła nawierzchnia")
@@ -30,8 +30,8 @@ class Review(models.Model):
         ParkingPoint, on_delete=models.PROTECT, related_name="reviews"
     )
     description = models.TextField(blank=True, null=True)  # Tylko dla "Inne"
-    attribiutes = ArrayField(
-        models.CharField(max_length=20, choices=Attribiutes.choices),
+    attributes = ArrayField(
+        models.CharField(max_length=20, choices=Attributes.choices),
         null=True,
         default=list,
         blank=True,

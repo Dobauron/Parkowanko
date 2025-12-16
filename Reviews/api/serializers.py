@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from ..models import Review
 from .validators import (
-    validate_attribiutes,
+    validate_attributes,
     validate_occupancy,
     validate_unique_review,
     validate_no_profanity,
@@ -9,8 +9,8 @@ from .validators import (
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    attribiutes = serializers.ListField(
-        child=serializers.CharField(validators=[validate_attribiutes]),
+    attributes = serializers.ListField(
+        child=serializers.CharField(validators=[validate_attributes]),
         required=False,
         allow_empty=True,
         default=list,
@@ -33,13 +33,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "parking_point_id",
-            "attribiutes",
+            "attributes",
             "occupancy",
             "description",
             "created_at",
             "is_like",
         ]
-        read_only_fields = ["id","created_at", "parking_point_id"]
+        read_only_fields = ["id", "created_at", "parking_point_id"]
 
     @validate_unique_review
     def validate(self, attrs):

@@ -48,10 +48,7 @@ class ParkingPointEditLocationView(CreateAPIView):
         )
         serializer.is_valid(raise_exception=True)
 
-        obj = serializer.save(
-            user=request.user,
-            parking_point=parking_point
-        )
+        obj = serializer.save(user=request.user, parking_point=parking_point)
 
         # Tworzymy automatycznie vote z is_like=None
         ParkingPointEditLocationVote.objects.create(

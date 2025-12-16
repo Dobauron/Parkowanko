@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .validators import (
     reject_invalid_location_structure,
-    reject_too_close_to_other_points
+    reject_too_close_to_other_points,
 )
 from ..models import ParkingPoint
 
@@ -30,7 +30,7 @@ class ParkingPointSerializer(serializers.ModelSerializer):
     def validate_location(self, location):
         return location
 
-    #zwraca pola like i dislike w metodzie POST
+    # zwraca pola like i dislike w metodzie POST
     def create(self, validated_data):
         instance = super().create(validated_data)
 

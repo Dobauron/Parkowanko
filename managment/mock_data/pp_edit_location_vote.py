@@ -1,5 +1,6 @@
 from parking_point_edit_location.models import ParkingPointEditLocationVote
 
+
 def create_edit_location_votes(users, edit_locations):
     """
     Tworzy głosy do propozycji edycji lokalizacji
@@ -22,7 +23,6 @@ def create_edit_location_votes(users, edit_locations):
             "user": users["diana"],
             "is_like": False,
         },
-
         # 👎 krakow_edit
         {
             "edit": edit_locations["krakow_edit"],
@@ -34,7 +34,6 @@ def create_edit_location_votes(users, edit_locations):
             "user": users["charlie"],
             "is_like": False,
         },
-
         # 😐 neutralny głos
         {
             "edit": edit_locations["krakow_edit"],
