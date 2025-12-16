@@ -30,9 +30,9 @@ def choice_validator(choices, field_name="value", allow_null=False):
 
 
 @choice_validator(
-    choices=Review.Attribiutes.choices, field_name="property", allow_null=False
+    choices=Review.Attributes.choices, field_name="property", allow_null=False
 )
-def validate_attribiutes(value):
+def validate_attributes(value):
     return value
 
 

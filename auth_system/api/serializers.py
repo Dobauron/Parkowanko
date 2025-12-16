@@ -1,18 +1,22 @@
 from rest_framework import serializers
+from django.conf import settings
 from auth_system.models import Account
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import Group
+from auth_system.services.auth import build_user_payload
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        data["id"] = self.user.id
-        data["username"] = self.user.username
+        data["expires_in"] = int(settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds())
+        data["user"] = build_user_payload(self.user)
 
         return data
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,6 +37,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data["username"],
             password=validated_data["password"],
         )
+        group, _ = Group.objects.get_or_create(name="USER")
+        user.groups.add(group)
         return user
 
 

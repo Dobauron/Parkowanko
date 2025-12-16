@@ -28,6 +28,7 @@ class ParkingPointEditLocationVote(models.Model):
     is_like = models.BooleanField(default=False, null=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         unique_together = (
             "parking_point_edit_location",

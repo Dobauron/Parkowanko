@@ -8,6 +8,7 @@ from parking_point.api.validators import (
     reject_too_close_to_other_points,
 )
 
+
 # ---------------------------------------------------------
 # Helper – Dummy serializer
 # ---------------------------------------------------------
@@ -34,22 +35,22 @@ def test_haversine_zero_distance():
 
 def test_haversine_known_distance():
     # Warszawa – Poznań ~279 km
-    dist = haversine(
-        52.2296756, 21.0122287,
-        52.406374, 16.9251681
-    )
+    dist = haversine(52.2296756, 21.0122287, 52.406374, 16.9251681)
     assert 275_000 < dist < 300_000
 
 
 # ---------------------------------------------------------
 # Testy: reject_invalid_location_structure
 # ---------------------------------------------------------
-@pytest.mark.parametrize("invalid_location", [
-    "not a dict",
-    None,
-    [],
-    123,
-])
+@pytest.mark.parametrize(
+    "invalid_location",
+    [
+        "not a dict",
+        None,
+        [],
+        123,
+    ],
+)
 def test_location_must_be_dict(invalid_location):
     serializer = DummySerializer()
 
@@ -59,11 +60,14 @@ def test_location_must_be_dict(invalid_location):
     assert "musi być obiektem JSON" in str(exc.value)
 
 
-@pytest.mark.parametrize("invalid_location", [
-    {"lat": 52},
-    {"lng": 21},
-    {},
-])
+@pytest.mark.parametrize(
+    "invalid_location",
+    [
+        {"lat": 52},
+        {"lng": 21},
+        {},
+    ],
+)
 def test_location_missing_lat_or_lng(invalid_location):
     serializer = DummySerializer()
 
@@ -73,11 +77,14 @@ def test_location_missing_lat_or_lng(invalid_location):
     assert "musi zawierać klucze 'lat' i 'lng'" in str(exc.value)
 
 
-@pytest.mark.parametrize("invalid_location", [
-    {"lat": "aaa", "lng": 21},
-    {"lat": 52, "lng": None},
-    {"lat": {}, "lng": []},
-])
+@pytest.mark.parametrize(
+    "invalid_location",
+    [
+        {"lat": "aaa", "lng": 21},
+        {"lat": 52, "lng": None},
+        {"lat": {}, "lng": []},
+    ],
+)
 def test_location_lat_lng_must_be_numeric(invalid_location):
     serializer = DummySerializer()
 
@@ -102,9 +109,7 @@ def test_reject_too_close_to_other_points_raises():
     serializer = DummySerializer()
 
     with pytest.raises(ValidationError) as exc:
-        serializer.validate_location_with_distance(
-            {"lat": 52.0001, "lng": 21.0001}
-        )
+        serializer.validate_location_with_distance({"lat": 52.0001, "lng": 21.0001})
 
     assert "zbyt blisko istniejącego punktu" in str(exc.value)
 
@@ -114,9 +119,9 @@ def test_reject_too_close_to_other_points_allows_far_points():
     ParkingPoint.objects.create(location={"lat": 52.0, "lng": 21.0})
     serializer = DummySerializer()
 
-    assert serializer.validate_location_with_distance(
-        {"lat": 53.0, "lng": 22.0}
-    ) is True
+    assert (
+        serializer.validate_location_with_distance({"lat": 53.0, "lng": 22.0}) is True
+    )
 
 
 @pytest.mark.django_db
@@ -124,9 +129,9 @@ def test_reject_too_close_ignores_self_when_editing():
     point = ParkingPoint.objects.create(location={"lat": 52.0, "lng": 21.0})
     serializer = DummySerializer(instance=point)
 
-    assert serializer.validate_location_with_distance(
-        {"lat": 52.0, "lng": 21.0}
-    ) is True
+    assert (
+        serializer.validate_location_with_distance({"lat": 52.0, "lng": 21.0}) is True
+    )
 
 
 @pytest.mark.django_db
@@ -134,6 +139,6 @@ def test_broken_location_data_in_db_is_ignored():
     ParkingPoint.objects.create(location={"lat": "abc", "lng": None})
     serializer = DummySerializer()
 
-    assert serializer.validate_location_with_distance(
-        {"lat": 50.0, "lng": 20.0}
-    ) is True
+    assert (
+        serializer.validate_location_with_distance({"lat": 50.0, "lng": 20.0}) is True
+    )

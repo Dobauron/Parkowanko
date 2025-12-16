@@ -15,7 +15,7 @@ class ResetDatabaseMockDataView(APIView):
         if not settings.DEBUG:
             return Response(
                 {"error": "Endpoint dostępny tylko w trybie DEBUG"},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         with transaction.atomic():
@@ -30,10 +30,13 @@ class ResetDatabaseMockDataView(APIView):
             # Seedujemy mocki
             result = seed_all()
 
-        return Response({
-            "status": "success",
-            "message": "Baza zresetowana i wypełniona mockami",
-            "users_created": len(result["users"]),
-            "parking_points_created": len(result["parking_points"]),
-            "edit_locations_created": len(result["edit_locations"])
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "message": "Baza zresetowana i wypełniona mockami",
+                "users_created": len(result["users"]),
+                "parking_points_created": len(result["parking_points"]),
+                "edit_locations_created": len(result["edit_locations"]),
+            },
+            status=status.HTTP_200_OK,
+        )

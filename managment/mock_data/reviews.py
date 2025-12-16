@@ -21,7 +21,6 @@ def create_reviews(users, parking_points):
             "is_like": True,
             "description": "Bez problemu zaparkowałem.",
         },
-
         # 👎 negatywne
         {
             "user": users["diana"],
@@ -29,7 +28,6 @@ def create_reviews(users, parking_points):
             "is_like": False,
             "description": "Zawsze zajęte.",
         },
-
         # 😐 neutralne
         {
             "user": users["eve"],
@@ -37,7 +35,6 @@ def create_reviews(users, parking_points):
             "is_like": False,
             "description": "Ciężko ocenić, różnie bywa.",
         },
-
         # 👍 mieszane
         {
             "user": users["alice"],
