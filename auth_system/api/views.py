@@ -3,6 +3,7 @@ from .serializers import (
     RegisterSerializer,
     ChangePasswordSerializer,
     CustomTokenObtainPairSerializer,
+    CustomTokenRefreshSerializer
 )
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
@@ -14,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
 from auth_system.services.auth import build_jwt_payload
+from rest_framework_simplejwt.views import TokenRefreshView
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -108,3 +110,9 @@ class GoogleLoginView(APIView):
                 "access": str(refresh.access_token),
             }
         )
+
+
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
