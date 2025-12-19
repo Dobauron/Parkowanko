@@ -40,7 +40,11 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     occupancy = models.CharField(
-        null=True, blank=True, max_length=255, choices=Occupancy.choices
+        max_length=255,
+        choices=Occupancy.choices,
+        default=Occupancy.NO_DATA,  # lub inna wartość domyślna
+        blank=False,  # nie pozwala na puste pola w formularzu
+        null=False,  # nie pozwala na NULL w bazie
     )
     is_like = models.BooleanField()
 

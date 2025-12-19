@@ -19,7 +19,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     occupancy = serializers.CharField(
         validators=[validate_occupancy],
-        required=False,
+        required=True,
         allow_null=True,
         allow_blank=True,
     )
