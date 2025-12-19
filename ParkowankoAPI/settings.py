@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "Reviews",
     "Ranks",
     "parking_point_edit_location",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
