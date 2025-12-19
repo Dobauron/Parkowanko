@@ -9,6 +9,7 @@ from .validators import (
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField(read_only=True)
     attributes = serializers.ListField(
         child=serializers.CharField(validators=[validate_attributes]),
         required=False,
@@ -38,8 +39,15 @@ class ReviewSerializer(serializers.ModelSerializer):
             "description",
             "created_at",
             "is_like",
+            "user"
         ]
         read_only_fields = ["id", "created_at", "parking_point_id"]
+
+    def get_user(self, obj):
+        return {
+            "id": obj.user_id,
+            "username": obj.user.username,
+        }
 
     @validate_unique_review
     def validate(self, attrs):
