@@ -11,7 +11,7 @@ from .validators import (
 
 
 class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
-    parkingId = serializers.IntegerField(source="parking_point.id", read_only=True)
+    parkingPointId = serializers.IntegerField(source="parking_point.id", read_only=True)
     like_count = serializers.SerializerMethodField()
     dislike_count = serializers.SerializerMethodField()
 
@@ -20,7 +20,7 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "location",  # JSONField zwracany bezpośrednio
-            "parkingId",
+            "parkingPointId",
             "like_count",
             "dislike_count",
         ]
