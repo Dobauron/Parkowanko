@@ -7,12 +7,16 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import Group
 from auth_system.services.auth import build_user_payload
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        data["expires_in"] = int(settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds())
+        data["expires_in"] = int(
+            settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
+        )
         data["user"] = build_user_payload(self.user)
 
         return data
@@ -52,8 +56,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         except ValidationError as e:
             raise serializers.ValidationError(e.messages)
         return value
-
-
 
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):

@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 def build_user_payload(user):
     """
     Tworzy spójny payload użytkownika do zwracania w response auth.
@@ -8,7 +9,7 @@ def build_user_payload(user):
     return {
         "id": user.id,
         "username": user.username,
-        "roles": list(user.groups.values_list("name", flat=True))
+        "roles": list(user.groups.values_list("name", flat=True)),
     }
 
 

@@ -39,7 +39,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "description",
             "created_at",
             "is_like",
-            "user"
+            "user",
         ]
         read_only_fields = ["id", "created_at", "parking_point_id"]
 
