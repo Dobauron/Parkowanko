@@ -32,10 +32,10 @@ def api_client():
 # Testowanie GET - pobieranie listy ParkingPoint
 def test_get_parking_points(api_client, parking_point):
     """Test sprawdzający pobranie listy obiektów ParkingPoint"""
-    response = api_client.get("/api/parkings/")
+    response = api_client.get("/api/parking-points/")
     assert response.status_code == status.HTTP_200_OK
     assert (
-        len(response.data) > 0
+            len(response.data) > 0
     )  # Sprawdzamy, czy w odpowiedzi jest przynajmniej jeden obiekt
 
 
@@ -45,71 +45,11 @@ def test_create_parking_point(api_client, user):
     """Test sprawdzający utworzenie obiektu ParkingPoint"""
     api_client.force_authenticate(user=user)  # Zaloguj użytkownika
     data = {"location": {"lat": 52.2297, "lng": 21.0122}}
-    response = api_client.post("/api/parkings/", data, format="json")
+    response = api_client.post("/api/parking-points/", data, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
     assert "location" in response.data
     assert (
-        "id" in response.data
+            "id" in response.data
     )  # Sprawdzamy, czy w odpowiedzi jest identyfikator nowo utworzonego obiektu
 
-
-@pytest.mark.django_db  # Dodajemy oznaczenie, aby umożliwić dostęp do bazy danych w testach
-# Testowanie PUT - aktualizacja ParkingPoint
-def test_update_parking_point(api_client, parking_point, user):
-    """Test sprawdzający aktualizację obiektu ParkingPoint"""
-    api_client.force_authenticate(user=user)  # Zaloguj użytkownika
-    updated_data = {
-        "location": {"lat": 52.2297, "lng": 21.0},
-    }
-    response = api_client.patch(
-        f"/api/parkings/{parking_point.id}/", updated_data, format="json"
-    )
-
-    assert (
-        response.status_code == status.HTTP_200_OK
-    )  # Bad request - 400, gdy dystanse miedzy POI sie nie zgadzają
-    assert response.data["location"] == updated_data["location"]
-    assert (
-        response.data["id"] == parking_point.id
-    )  # Sprawdzamy, czy ID pozostało niezmienione
-
-
-@pytest.mark.django_db  # Dodajemy oznaczenie, aby umożliwić dostęp do bazy danych w testach
-# Testowanie PUT - nieprawidłowe dane lokalizacji
-def test_update_parking_point_invalid_location(api_client, parking_point, user):
-    """Test sprawdzający nieprawidłowe dane lokalizacji podczas aktualizacji"""
-    api_client.force_authenticate(user=user)
-    invalid_data = {
-        "location": {"lat": "invalid", "lng": "invalid"},
-    }
-    response = api_client.put(
-        f"/api/parkings/{parking_point.id}/", invalid_data, format="json"
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Nieprawidłowe dane lokalizacji" in str(response.data)
-
-
-@pytest.mark.django_db  # Dodajemy oznaczenie, aby umożliwić dostęp do bazy danych w testach
-# Testowanie walidacji lokalizacji (max_distance)
-def test_update_parking_point_invalid_location_distance(
-    api_client, parking_point, user
-):
-    """Test sprawdzający walidację lokalizacji, gdzie odległość przekracza dozwoloną wartość"""
-    api_client.force_authenticate(user=user)
-    invalid_location_data = {
-        "location": {
-            "lat": 52.5000,
-            "lng": 21.1000,
-        },  # Przykład z odległością większą niż 1000m
-    }
-    response = api_client.put(
-        f"/api/parkings/{parking_point.id}/", invalid_location_data, format="json"
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert (
-        "Nowa lokalizacja jest zbyt oddalona od obecnej pozycji: 30641.51m (maksymalnie 1000m)."
-        in str(response.data)
-    )

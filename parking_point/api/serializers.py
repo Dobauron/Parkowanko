@@ -8,8 +8,9 @@ from ..models import ParkingPoint
 
 class ParkingPointSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    like_count = serializers.IntegerField(read_only=True)
-    dislike_count = serializers.IntegerField(read_only=True)
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    like_count = serializers.SerializerMethodField()
+    dislike_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ParkingPoint
@@ -25,17 +26,14 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "dislike_count",
         )
 
+    def get_like_count(self, obj):
+        return getattr(obj, "like_count", 0)
+
+    def get_dislike_count(self, obj):
+        return getattr(obj, "dislike_count", 0)
+
     @reject_invalid_location_structure
     @reject_too_close_to_other_points(distance_limit=40)
     def validate_location(self, location):
         return location
 
-    # zwraca pola like i dislike w metodzie POST
-    def create(self, validated_data):
-        instance = super().create(validated_data)
-
-        # wstrzykujemy brakujące pola
-        instance.like_count = 0
-        instance.dislike_count = 0
-
-        return instance
