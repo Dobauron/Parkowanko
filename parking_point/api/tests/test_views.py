@@ -50,10 +50,14 @@ def test_get_parking_points_contains_like_and_dislike_counts(
     User = get_user_model()
 
     user_like = User.objects.create_user(
-        email="like@gmail.com", password="password"
+        username="user_like",
+        email="like@gmail.com",
+        password="password",
     )
     user_dislike = User.objects.create_user(
-        email="dislike@gmail.com", password="password"
+        username="user_dislike",
+        email="dislike@gmail.com",
+        password="password",
     )
 
     Review.objects.create(
