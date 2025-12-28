@@ -53,6 +53,11 @@ class ReviewAPICreateListView(ListCreateAPIView):
 
         return super().get_serializer(*args, **kwargs)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["parking_point"] = self.get_parking_point()
+        return context
+
     def perform_create(self, serializer):
         parking_point = self.get_parking_point()
         if parking_point is None:
