@@ -6,7 +6,6 @@ from functools import wraps
 from rest_framework import serializers
 
 
-
 # ---------------- Choice validator (uniwersalny) ---------------- #
 
 
@@ -100,7 +99,9 @@ def validate_unique_review(func):
         user = self.context["request"].user
 
         if self.instance is None:  # tylko przy tworzeniu nowej recenzji
-            exists = Review.objects.filter(user=user, parking_point=parking_point).exists()
+            exists = Review.objects.filter(
+                user=user, parking_point=parking_point
+            ).exists()
             if exists:
                 raise serializers.ValidationError(
                     {

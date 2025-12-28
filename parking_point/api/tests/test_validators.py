@@ -118,9 +118,7 @@ def test_distance_equal_to_limit_is_allowed():
 
     # ~50 m różnicy
     assert (
-        serializer.validate_location_with_distance(
-            {"lat": 52.00045, "lng": 21.0}
-        )
+        serializer.validate_location_with_distance({"lat": 52.00045, "lng": 21.0})
         is True
     )
 
@@ -131,8 +129,7 @@ def test_reject_too_close_allows_far_points():
     serializer = DummySerializer()
 
     assert (
-        serializer.validate_location_with_distance({"lat": 53.0, "lng": 22.0})
-        is True
+        serializer.validate_location_with_distance({"lat": 53.0, "lng": 22.0}) is True
     )
 
 
@@ -142,8 +139,7 @@ def test_reject_too_close_ignores_self_when_editing():
     serializer = DummySerializer(instance=point)
 
     assert (
-        serializer.validate_location_with_distance({"lat": 52.0, "lng": 21.0})
-        is True
+        serializer.validate_location_with_distance({"lat": 52.0, "lng": 21.0}) is True
     )
 
 
@@ -153,8 +149,7 @@ def test_instance_without_id_does_not_break():
     serializer = DummySerializer(instance=point)
 
     assert (
-        serializer.validate_location_with_distance({"lat": 53.0, "lng": 22.0})
-        is True
+        serializer.validate_location_with_distance({"lat": 53.0, "lng": 22.0}) is True
     )
 
 
@@ -174,8 +169,7 @@ def test_broken_location_data_in_db_is_ignored():
     serializer = DummySerializer()
 
     assert (
-        serializer.validate_location_with_distance({"lat": 50.0, "lng": 20.0})
-        is True
+        serializer.validate_location_with_distance({"lat": 50.0, "lng": 20.0}) is True
     )
 
 

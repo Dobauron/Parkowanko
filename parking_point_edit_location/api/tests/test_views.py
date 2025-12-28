@@ -55,13 +55,13 @@ def proposal(user_factory, parking_point):
 # ParkingPointEditLocationView
 # ---------------------------------------------------------
 @pytest.mark.django_db
-def test_get_edit_location_returns_404_when_missing(api_client, user_factory, parking_point):
+def test_get_edit_location_returns_404_when_missing(
+    api_client, user_factory, parking_point
+):
     user = user_factory()
     api_client.force_authenticate(user=user)
 
-    response = api_client.get(
-        f"/api/parking-points/{parking_point.id}/edit-location/"
-    )
+    response = api_client.get(f"/api/parking-points/{parking_point.id}/edit-location/")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -104,9 +104,7 @@ def test_post_edit_location_creates_proposal_and_initial_vote(
 
     assert response.status_code == status.HTTP_201_CREATED
 
-    proposal = ParkingPointEditLocation.objects.get(
-        parking_point=parking_point
-    )
+    proposal = ParkingPointEditLocation.objects.get(parking_point=parking_point)
 
     vote = ParkingPointEditLocationVote.objects.get(
         parking_point_edit_location=proposal,
@@ -114,7 +112,6 @@ def test_post_edit_location_creates_proposal_and_initial_vote(
     )
 
     assert vote.is_like is None
-
 
 
 @pytest.mark.django_db
@@ -152,9 +149,7 @@ def test_post_vote_creates_vote(user_factory, api_client, proposal):
 
 
 @pytest.mark.django_db
-def test_post_vote_fails_without_proposal(
-    api_client, user_factory, parking_point
-):
+def test_post_vote_fails_without_proposal(api_client, user_factory, parking_point):
     user = user_factory()
     api_client.force_authenticate(user=user)
 
@@ -168,9 +163,7 @@ def test_post_vote_fails_without_proposal(
 
 
 @pytest.mark.django_db
-def test_put_vote_updates_existing_vote(
-    api_client, user_factory, proposal
-):
+def test_put_vote_updates_existing_vote(api_client, user_factory, proposal):
     user = user_factory()
     api_client.force_authenticate(user=user)
 
@@ -193,9 +186,7 @@ def test_put_vote_updates_existing_vote(
 
 
 @pytest.mark.django_db
-def test_put_vote_requires_existing_vote(
-    api_client, user_factory, proposal
-):
+def test_put_vote_requires_existing_vote(api_client, user_factory, proposal):
     user = user_factory()
     api_client.force_authenticate(user=user)
 

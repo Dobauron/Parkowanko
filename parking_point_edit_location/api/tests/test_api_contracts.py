@@ -12,6 +12,7 @@ from parking_point_edit_location.models import ParkingPointEditLocation
 #  Fixtures (lokalne, jawne – brak magii)
 # ============================================================
 
+
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -37,6 +38,7 @@ def parking_point(db, user):
 # ============================================================
 #  CONTRACT TEST: GET == POST
 # ============================================================
+
 
 @pytest.mark.django_db
 def test_get_returns_same_payload_as_post(

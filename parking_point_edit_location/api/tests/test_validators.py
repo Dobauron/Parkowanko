@@ -24,6 +24,7 @@ User = get_user_model()
 #  Fixtures
 # ============================================================
 
+
 @pytest.fixture
 def user_factory(db):
     def create_user(email=None, username=None):
@@ -31,7 +32,10 @@ def user_factory(db):
             email = f"user_{uuid.uuid4().hex}@test.com"
         if username is None:
             username = f"user_{uuid.uuid4().hex}"
-        return User.objects.create_user(email=email, username=username, password="password123")
+        return User.objects.create_user(
+            email=email, username=username, password="password123"
+        )
+
     return create_user
 
 
@@ -64,6 +68,7 @@ def edit_location(db, user_factory, parking_point):
 #  Helpers
 # ============================================================
 
+
 class DummySerializer(serializers.Serializer):
     location = serializers.JSONField(required=False)
 
@@ -75,15 +80,14 @@ class DummySerializer(serializers.Serializer):
 #  validate_location_structure
 # ============================================================
 
+
 def test_validate_location_structure_valid():
     class TestSerializer(DummySerializer):
         @validate_location_structure()
         def validate(self, attrs):
             return attrs
 
-    serializer = TestSerializer(
-        data={"location": {"lat": 52.1, "lng": 21.0}}
-    )
+    serializer = TestSerializer(data={"location": {"lat": 52.1, "lng": 21.0}})
 
     assert serializer.is_valid(), serializer.errors
 
@@ -114,6 +118,7 @@ def test_validate_location_structure_invalid(location):
 # ============================================================
 #  validate_no_existing_proposal
 # ============================================================
+
 
 @pytest.mark.django_db
 def test_validate_no_existing_proposal_ok(parking_point):
@@ -155,6 +160,7 @@ def test_validate_no_existing_proposal_blocks(parking_point):
 # ============================================================
 #  validate_distance
 # ============================================================
+
 
 @pytest.mark.django_db
 def test_validate_distance_ok(parking_point):
@@ -216,6 +222,7 @@ def test_validate_distance_too_far(parking_point):
 #  validate_user_not_voted
 # ============================================================
 
+
 @pytest.mark.django_db
 def test_validate_user_not_voted_ok(user_factory, edit_location, api_rf):
     user = user_factory()
@@ -275,6 +282,7 @@ def test_validate_user_not_voted_blocks_second_vote(
 #  validate_proposal_exists
 # ============================================================
 
+
 @pytest.mark.django_db
 def test_validate_proposal_exists_ok(edit_location):
     class TestSerializer(serializers.Serializer):
@@ -310,6 +318,7 @@ def test_validate_proposal_exists_removed(edit_location):
 # ============================================================
 #  validate_has_edit_location_proposal
 # ============================================================
+
 
 @pytest.mark.django_db
 def test_validate_has_edit_location_proposal_ok(edit_location):

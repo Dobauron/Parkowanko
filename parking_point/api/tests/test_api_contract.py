@@ -10,6 +10,7 @@ from parking_point.models import ParkingPoint
 #  Fixtures
 # ============================================================
 
+
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -28,6 +29,7 @@ def user(db):
 #  CONTRACT TEST: GET == POST
 # ============================================================
 
+
 @pytest.mark.django_db
 def test_parking_point_get_contains_post_payload(
     api_client,
@@ -42,9 +44,7 @@ def test_parking_point_get_contains_post_payload(
 
     url = "/api/parking-points/"
 
-    payload = {
-        "location": {"lat": 52.2297, "lng": 21.0122}
-    }
+    payload = {"location": {"lat": 52.2297, "lng": 21.0122}}
 
     # -------- POST --------
     post_response = api_client.post(url, payload, format="json")
@@ -68,9 +68,7 @@ def test_parking_point_get_contains_post_payload(
     # DRF może zwrócić listę albo paginated response
     results = data["results"] if "results" in data else data
 
-    created_obj = next(
-        item for item in results if item["id"] == created_id
-    )
+    created_obj = next(item for item in results if item["id"] == created_id)
 
     # -------- CONTRACT ASSERTION --------
     assert created_obj == post_data

@@ -44,9 +44,7 @@ def test_get_parking_points_returns_list(api_client, parking_point):
 
 
 @pytest.mark.django_db
-def test_get_parking_points_contains_like_and_dislike_counts(
-    api_client, parking_point
-):
+def test_get_parking_points_contains_like_and_dislike_counts(api_client, parking_point):
     User = get_user_model()
 
     user_like = User.objects.create_user(
@@ -136,8 +134,6 @@ def test_put_is_not_allowed(api_client, parking_point):
 
 @pytest.mark.django_db
 def test_delete_is_not_allowed(api_client, parking_point):
-    response = api_client.delete(
-        f"/api/parking-points/{parking_point.id}/"
-    )
+    response = api_client.delete(f"/api/parking-points/{parking_point.id}/")
 
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED

@@ -11,6 +11,7 @@ User = get_user_model()
 # Fixtures
 # ============================================================
 
+
 @pytest.fixture
 def user_factory(db):
     """
@@ -50,6 +51,7 @@ def parking_point_factory(user_factory, db):
 # Testy serializera
 # ============================================================
 
+
 @pytest.mark.django_db
 def test_review_serializer_valid(user_factory, parking_point_factory):
     user = user_factory("testuser1")
@@ -65,22 +67,25 @@ def test_review_serializer_valid(user_factory, parking_point_factory):
     request = type("Request", (), {"user": user})()  # prosty dummy request
 
     serializer = ReviewSerializer(
-        data=data,
-        context={"request": request, "parking_point": pp}
+        data=data, context={"request": request, "parking_point": pp}
     )
 
     assert serializer.is_valid(), serializer.errors
     review = serializer.save(user=user, parking_point=pp)
     assert review.pk is not None
 
+
 @pytest.mark.django_db
 def test_review_serializer_invalid_occupancy(user_factory, parking_point_factory):
     user = user_factory("user2")
     pp = parking_point_factory(user=user)
     data = {"occupancy": "INVALID_OCCUPANCY", "is_like": True}
-    serializer = ReviewSerializer(data=data, context={"user": user, "parking_point": pp})
+    serializer = ReviewSerializer(
+        data=data, context={"user": user, "parking_point": pp}
+    )
     assert not serializer.is_valid()
     assert "occupancy" in serializer.errors
+
 
 @pytest.mark.django_db
 def test_review_serializer_description_profanity(user_factory, parking_point_factory):
@@ -95,17 +100,22 @@ def test_review_serializer_description_profanity(user_factory, parking_point_fac
     }
 
     request = type("Request", (), {"user": user})()
-    serializer = ReviewSerializer(data=data, context={"request": request, "parking_point": pp})
+    serializer = ReviewSerializer(
+        data=data, context={"request": request, "parking_point": pp}
+    )
 
     assert not serializer.is_valid()
     assert "Opis zawiera niedozwolone słowa" in str(serializer.errors)
+
 
 @pytest.mark.django_db
 def test_review_serializer_unique_review(user_factory, parking_point_factory):
     user = user_factory("testuser23")
     pp = parking_point_factory(user=user)
 
-    Review.objects.create(user=user, parking_point=pp, occupancy=Review.Occupancy.LOW, is_like=True)
+    Review.objects.create(
+        user=user, parking_point=pp, occupancy=Review.Occupancy.LOW, is_like=True
+    )
 
     data = {
         "attributes": [],
@@ -115,16 +125,21 @@ def test_review_serializer_unique_review(user_factory, parking_point_factory):
     }
 
     request = type("Request", (), {"user": user})()
-    serializer = ReviewSerializer(data=data, context={"request": request, "parking_point": pp})
+    serializer = ReviewSerializer(
+        data=data, context={"request": request, "parking_point": pp}
+    )
 
     assert not serializer.is_valid()
     assert "Możesz dodać tylko jedną recenzję" in str(serializer.errors)
+
 
 @pytest.mark.django_db
 def test_review_serializer_get_user_field(user_factory, parking_point_factory):
     user = user_factory("user5")
     pp = parking_point_factory(user=user)
-    review = Review.objects.create(user=user, parking_point=pp, occupancy=Review.Occupancy.MEDIUM, is_like=True)
+    review = Review.objects.create(
+        user=user, parking_point=pp, occupancy=Review.Occupancy.MEDIUM, is_like=True
+    )
     serializer = ReviewSerializer(instance=review)
     user_data = serializer.data["user"]
     assert user_data["id"] == user.id

@@ -127,9 +127,7 @@ def test_unique_vote_per_user(edit_location, user_factory):
 
 
 @pytest.mark.django_db
-def test_vote_cascade_delete_edit_location(
-    edit_location, user_factory
-):
+def test_vote_cascade_delete_edit_location(edit_location, user_factory):
     ParkingPointEditLocationVote.objects.create(
         parking_point_edit_location=edit_location,
         user=user_factory(),

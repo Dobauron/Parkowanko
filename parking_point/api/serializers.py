@@ -36,4 +36,3 @@ class ParkingPointSerializer(serializers.ModelSerializer):
     @reject_too_close_to_other_points(distance_limit=40)
     def validate_location(self, location):
         return location
-

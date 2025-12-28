@@ -7,32 +7,42 @@ from Reviews.api.serializers import ReviewSerializer
 # Fixtures
 # ============================================================
 
+
 @pytest.fixture
 def user_factory(db, django_user_model):
     def make_user(username, email=None):
         if email is None:
             email = f"{username}@test.com"
-        return django_user_model.objects.create_user(username=username, email=email, password="password")
+        return django_user_model.objects.create_user(
+            username=username, email=email, password="password"
+        )
+
     return make_user
+
 
 @pytest.fixture
 def parking_point_factory(db):
     from parking_point.models import ParkingPoint
+
     def make_parking_point(user):
         return ParkingPoint.objects.create(
-            location={"lat": 52.2297, "lng": 21.0122},
-            user=user
+            location={"lat": 52.2297, "lng": 21.0122}, user=user
         )
+
     return make_parking_point
+
 
 @pytest.fixture
 def api_client():
     from rest_framework.test import APIClient
+
     return APIClient()
+
 
 # ============================================================
 # Testy kontraktów POST ↔ GET dla Review
 # ============================================================
+
 
 @pytest.mark.django_db
 def test_review_post_get_consistency(user_factory, parking_point_factory, api_client):
@@ -52,8 +62,13 @@ def test_review_post_get_consistency(user_factory, parking_point_factory, api_cl
     # POST
     post_response = api_client.post(
         f"/api/parking-points/{pp.id}/reviews/",
-        {"parking_point": pp.id, "attributes": [], "occupancy": "LOW", "description": "Brak przekleństw"},
-        format="json"
+        {
+            "parking_point": pp.id,
+            "attributes": [],
+            "occupancy": "LOW",
+            "description": "Brak przekleństw",
+        },
+        format="json",
     )
     assert post_response.status_code == status.HTTP_201_CREATED, post_response.data
 

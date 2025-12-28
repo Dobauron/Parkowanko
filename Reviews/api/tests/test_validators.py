@@ -14,14 +14,18 @@ from parking_point.models import ParkingPoint
 # Fixtures
 # ============================================================
 
+
 @pytest.fixture
 def user_factory(db):
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
     created_users = []
 
     def make_user(username):
-        user = User.objects.create_user(username=username, email=f"{username}@test.com", password="pass")
+        user = User.objects.create_user(
+            username=username, email=f"{username}@test.com", password="pass"
+        )
         created_users.append(user)
         return user
 
@@ -46,6 +50,7 @@ def parking_point_factory(user_factory, db):
 # validate_attributes
 # ============================================================
 
+
 def test_validate_attributes_valid():
     for choice in [c[0] for c in Review.Attributes.choices]:
         assert validate_attributes(choice) == choice
@@ -59,6 +64,7 @@ def test_validate_attributes_invalid():
 # ============================================================
 # validate_occupancy
 # ============================================================
+
 
 def test_validate_occupancy_valid():
     for choice in [c[0] for c in Review.Occupancy.choices]:
@@ -74,6 +80,7 @@ def test_validate_occupancy_invalid():
 # validate_no_profanity
 # ============================================================
 
+
 def test_validate_no_profanity_clean_text():
     text = "To jest poprawny opis."
     assert validate_no_profanity(text) == text
@@ -88,6 +95,7 @@ def test_validate_no_profanity_blocked_text(bad_word):
 # ============================================================
 # validate_unique_review
 # ============================================================
+
 
 @pytest.mark.django_db
 def test_validate_unique_review_allows_new_review(user_factory, parking_point_factory):
@@ -114,7 +122,9 @@ def test_validate_unique_review_blocks_duplicate(user_factory, parking_point_fac
     user = user_factory("user2")
     pp = parking_point_factory(user=user)
 
-    Review.objects.create(user=user, parking_point=pp, occupancy=Review.Occupancy.HIGH, is_like=True)
+    Review.objects.create(
+        user=user, parking_point=pp, occupancy=Review.Occupancy.HIGH, is_like=True
+    )
 
     class DummySerializer:
         context = {"request": type("Request", (), {"user": user})()}
@@ -128,6 +138,6 @@ def test_validate_unique_review_blocks_duplicate(user_factory, parking_point_fac
 
     wrapper = validate_unique_review(dummy_validate)
     import pytest
+
     with pytest.raises(ValidationError):
         wrapper(serializer, attrs)
-

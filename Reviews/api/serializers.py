@@ -10,7 +10,9 @@ from .validators import (
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
-    parking_point_id = serializers.IntegerField(source="parking_point.id", read_only=True)
+    parking_point_id = serializers.IntegerField(
+        source="parking_point.id", read_only=True
+    )
     attributes = serializers.ListField(
         child=serializers.CharField(validators=[validate_attributes]),
         required=False,
@@ -53,5 +55,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     @validate_unique_review
     def validate(self, attrs):
         # jeśli walidator potrzebuje parking_point, pobiera go z kontekstu:
-        attrs["parking_point"] = attrs.get("parking_point") or self.context.get("parking_point")
+        attrs["parking_point"] = attrs.get("parking_point") or self.context.get(
+            "parking_point"
+        )
         return attrs
