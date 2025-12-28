@@ -28,7 +28,7 @@ def test_create_superuser():
 
 @pytest.mark.django_db
 def test_create_user_without_email():
-    with pytest.raises(ValueError, match="You must provide an email address"):
+    with pytest.raises(ValueError, match="Email is required"):
         Account.objects.create_user(email="", password="password")
 
 

@@ -3,6 +3,7 @@ from better_profanity import profanity
 from rest_framework.exceptions import ValidationError
 from ..models import Review
 from functools import wraps
+from rest_framework import serializers
 
 
 # ---------------- Choice validator (uniwersalny) ---------------- #
@@ -77,17 +78,37 @@ def validate_no_profanity(value):
 
 
 def validate_unique_review(func):
+    """
+    Walidator sprawdzający, czy użytkownik nie dodał już recenzji dla danego parking point.
+    """
+
     @wraps(func)
     def wrapper(self, attrs):
+        # Spróbuj pobrać parking_point z kontekstu (domyślna metoda w DRF przy read_only)
+        parking_point = self.context.get("parking_point")
+
+        if parking_point is None:
+            # Jeśli nie ma w kontekście, sprawdź w attrs (np. w testach lub niestandardowych przypadkach)
+            parking_point = attrs.get("parking_point")
+
+        if parking_point is None:
+            raise serializers.ValidationError(
+                {"parking_point": "Nie można znaleźć obiektu parking_point."}
+            )
+
         user = self.context["request"].user
-        parking_point = attrs.get("parking_point")
-        if self.instance is None:
-            if Review.objects.filter(user=user, parking_point=parking_point).exists():
-                raise ValidationError(
+
+        if self.instance is None:  # tylko przy tworzeniu nowej recenzji
+            exists = Review.objects.filter(
+                user=user, parking_point=parking_point
+            ).exists()
+            if exists:
+                raise serializers.ValidationError(
                     {
                         "detail": "Możesz dodać tylko jedną recenzję dla tego parking point."
                     }
                 )
+
         return func(self, attrs)
 
     return wrapper

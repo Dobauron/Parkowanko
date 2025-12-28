@@ -105,8 +105,23 @@ class TestParkingPointSerializerGet:
 
         serializer = ParkingPointSerializer(point)
         data = serializer.data
-
         assert data["id"] == point.id
         assert data["location"] == valid_location
         assert data["like_count"] == 0
         assert data["dislike_count"] == 0
+        assert data["user_id"] == user.id
+
+
+@pytest.mark.django_db
+class TestParkingPointSerializerCreate:
+    def test_create_valid_data(self, user, valid_location):
+        serializer = ParkingPointSerializer(
+            data={"location": valid_location},
+            context={"request": type("obj", (), {"user": user})()},
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        instance = serializer.save()
+
+        assert instance.location == valid_location
+        assert instance.user == user
