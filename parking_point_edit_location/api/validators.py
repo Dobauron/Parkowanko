@@ -79,32 +79,18 @@ def validate_location_structure():
     return decorator
 
 
-def validate_distance(min_distance=20, max_distance=100):
-    """
-    JEDEN walidator który sprawdza zakres odległości 20-100 metrów
-    """
-
+def validate_distance(min_distance=40, max_distance=100):
     def decorator(validate_method):
         def wrapper(self, attrs):
             location = attrs.get("location")
             parking_point = self.context.get("parking_point")
 
             if location and parking_point:
+                # Użyj self.instance - DRF ustawia to automatycznie
+                # self.instance będzie None dla create, a ustawione dla update
+
+                # Zawsze porównujemy z oryginalnym parking_point
                 current_location = parking_point.location
-
-                # Sprawdź czy obecna lokalizacja istnieje
-                if (
-                    not current_location
-                    or "lat" not in current_location
-                    or "lng" not in current_location
-                ):
-                    raise serializers.ValidationError(
-                        {
-                            "location": "Obecna lokalizacja punktu nie zawiera poprawnych współrzędnych."
-                        }
-                    )
-
-                # Oblicz odległość
                 distance, error = get_distance_between_locations(
                     location, current_location
                 )
@@ -112,7 +98,6 @@ def validate_distance(min_distance=20, max_distance=100):
                 if error:
                     raise serializers.ValidationError({"location": error})
 
-                # JEDNA walidacja z zakresem
                 if distance < min_distance:
                     raise serializers.ValidationError(
                         {
@@ -120,7 +105,6 @@ def validate_distance(min_distance=20, max_distance=100):
                             f"Odległość: {distance:.1f}m, minimalnie: {min_distance}m."
                         }
                     )
-
                 if distance > max_distance:
                     raise serializers.ValidationError(
                         {

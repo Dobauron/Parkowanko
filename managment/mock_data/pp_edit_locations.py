@@ -3,7 +3,8 @@ from parking_point_edit_location.models import ParkingPointEditLocation
 
 def create_edit_locations(users, parking_points):
     """
-    Tworzy propozycje edycji lokalizacji ParkingPoint
+    Tworzy propozycje edycji lokalizacji ParkingPoint.
+    Jeśli użytkownik już ma propozycję dla danego parking_point, nadpisuje ją.
     """
 
     edit_locations_data = [
@@ -24,12 +25,11 @@ def create_edit_locations(users, parking_points):
     created_edits = {}
 
     for data in edit_locations_data:
-        edit, _ = ParkingPointEditLocation.objects.get_or_create(
+        # jeśli istnieje → nadpisz location
+        edit, created = ParkingPointEditLocation.objects.update_or_create(
+            user=data["user"],
             parking_point=data["parking_point"],
-            defaults={
-                "user": data["user"],
-                "location": data["location"],
-            },
+            defaults={"location": data["location"]},
         )
         created_edits[data["key"]] = edit
 
