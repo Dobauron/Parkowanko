@@ -1,146 +1,251 @@
 import pytest
 from django.contrib.auth import get_user_model
-from parking_point.models import ParkingPoint
-from Reviews.models import Review
+from rest_framework.test import APIRequestFactory
 from Reviews.api.serializers import ReviewSerializer
+from Reviews.models import Review
+from parking_point.models import ParkingPoint
 
 User = get_user_model()
 
 
-# ============================================================
-# Fixtures
-# ============================================================
+# -----------------------
+# FIXTURES
+# -----------------------
 
 
 @pytest.fixture
-def user_factory(db):
-    """
-    Fabryka użytkowników. Zwraca funkcję do tworzenia wielu użytkowników
-    """
-    created_users = []
-
-    def make_user(username, email=None):
-        nonlocal created_users
-        email = email or f"{username}@test.com"
-        user = User.objects.create_user(username=username, email=email, password="pass")
-        created_users.append(user)
-        return user
-
-    return make_user
+def api_client_request_factory():
+    return APIRequestFactory()
 
 
 @pytest.fixture
-def parking_point_factory(user_factory, db):
+def user(db):
+    return User.objects.create_user(
+        username="testuser",
+        password="password123",
+        email="test@testuser.com",
+    )
+
+
+@pytest.fixture
+def parking_point(db, user):
+    return ParkingPoint.objects.create(
+        user=user,
+        location={"lat": 52.0, "lng": 21.0},
+    )
+
+
+@pytest.fixture
+def api_request(api_client_request_factory, user):
     """
-    Fabryka ParkingPoint. Zwraca funkcję do tworzenia punktów.
+    Zwraca request DRF z user
     """
-    points = []
-
-    def make_parking_point(user=None, lat=52.0, lng=21.0):
-        nonlocal points
-        if user is None:
-            user = user_factory("owner")
-        pp = ParkingPoint.objects.create(location={"lat": lat, "lng": lng}, user=user)
-        points.append(pp)
-        return pp
-
-    return make_parking_point
+    req = api_client_request_factory.post("/")
+    req.user = user
+    return req
 
 
-# ============================================================
-# Testy serializera
-# ============================================================
+# -----------------------
+# TESTS
+# -----------------------
 
 
 @pytest.mark.django_db
-def test_review_serializer_valid(user_factory, parking_point_factory):
-    user = user_factory("testuser1")
-    pp = parking_point_factory(user=user)
-
+def test_serializer_creates_review(api_request, parking_point, user):
+    """
+    Serializer tworzy nowe review
+    """
     data = {
-        "attributes": [],
-        "occupancy": Review.Occupancy.LOW,
-        "description": "Bez przekleństw",
-        "is_like": True,
+        "occupancy": "HIGH",
+        "attributes": ["POOR_SURFACE"],
+        "description": "Testowa opinia",
+        "is_like": False,
     }
 
-    request = type("Request", (), {"user": user})()  # prosty dummy request
-
     serializer = ReviewSerializer(
-        data=data, context={"request": request, "parking_point": pp}
+        data=data,
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
     )
 
     assert serializer.is_valid(), serializer.errors
-    review = serializer.save(user=user, parking_point=pp)
-    assert review.pk is not None
+    review = serializer.save()
+
+    assert Review.objects.count() == 1
+    assert review.user == user
+    assert review.parking_point == parking_point
+    assert review.occupancy == "HIGH"
 
 
 @pytest.mark.django_db
-def test_review_serializer_invalid_occupancy(user_factory, parking_point_factory):
-    user = user_factory("user2")
-    pp = parking_point_factory(user=user)
-    data = {"occupancy": "INVALID_OCCUPANCY", "is_like": True}
-    serializer = ReviewSerializer(
-        data=data, context={"user": user, "parking_point": pp}
+def test_serializer_updates_existing_review(api_request, parking_point, user):
+    """
+    Drugi save() nadpisuje istniejące review (UPSERT)
+    """
+    Review.objects.create(
+        user=user,
+        parking_point=parking_point,
+        occupancy="LOW",
+        is_like=False,
     )
+
+    data = {
+        "occupancy": "HIGH",
+        "attributes": ["POOR_LIGHTING"],
+        "description": "Zmieniona opinia",
+        "is_like": True,
+    }
+
+    serializer = ReviewSerializer(
+        data=data,
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
+    )
+
+    assert serializer.is_valid(), serializer.errors
+    review = serializer.save()
+
+    assert Review.objects.count() == 1
+    assert review.occupancy == "HIGH"
+    assert review.attributes == ["POOR_LIGHTING"]
+    assert review.description == "Zmieniona opinia"
+
+
+@pytest.mark.django_db
+def test_serializer_requires_occupancy(api_request, parking_point):
+    """
+    occupancy jest wymagane
+    """
+    serializer = ReviewSerializer(
+        data={"description": "Brak occupancy"},
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
+    )
+
     assert not serializer.is_valid()
     assert "occupancy" in serializer.errors
 
 
 @pytest.mark.django_db
-def test_review_serializer_description_profanity(user_factory, parking_point_factory):
-    user = user_factory("testuser1")
-    pp = parking_point_factory(user=user)
-
-    data = {
-        "attributes": [],
-        "occupancy": Review.Occupancy.LOW,
-        "description": "kurwa",
-        "is_like": True,
-    }
-
-    request = type("Request", (), {"user": user})()
+def test_serializer_rejects_invalid_occupancy(api_request, parking_point):
+    """
+    Niepoprawna wartość occupancy
+    """
     serializer = ReviewSerializer(
-        data=data, context={"request": request, "parking_point": pp}
+        data={
+            "occupancy": "INVALID",
+            "is_like": False,
+        },
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
     )
 
     assert not serializer.is_valid()
-    assert "Opis zawiera niedozwolone słowa" in str(serializer.errors)
+    assert "occupancy" in serializer.errors
 
 
 @pytest.mark.django_db
-def test_review_serializer_unique_review(user_factory, parking_point_factory):
-    user = user_factory("testuser23")
-    pp = parking_point_factory(user=user)
-
-    Review.objects.create(
-        user=user, parking_point=pp, occupancy=Review.Occupancy.LOW, is_like=True
-    )
-
-    data = {
-        "attributes": [],
-        "occupancy": Review.Occupancy.LOW,
-        "description": "Brak przekleństw",
-        "is_like": True,
-    }
-
-    request = type("Request", (), {"user": user})()
+def test_serializer_allows_empty_attributes(api_request, parking_point):
+    """
+    attributes mogą być puste
+    """
     serializer = ReviewSerializer(
-        data=data, context={"request": request, "parking_point": pp}
+        data={
+            "occupancy": "LOW",
+            "attributes": [],
+            "is_like": False,
+        },
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
     )
 
-    assert not serializer.is_valid()
-    assert "Możesz dodać tylko jedną recenzję" in str(serializer.errors)
+    assert serializer.is_valid(), serializer.errors
+    review = serializer.save()
+
+    assert review.attributes == []
 
 
 @pytest.mark.django_db
-def test_review_serializer_get_user_field(user_factory, parking_point_factory):
-    user = user_factory("user5")
-    pp = parking_point_factory(user=user)
-    review = Review.objects.create(
-        user=user, parking_point=pp, occupancy=Review.Occupancy.MEDIUM, is_like=True
+def test_serializer_sets_default_attributes_list(api_request, parking_point):
+    """
+    attributes domyślnie = []
+    """
+    serializer = ReviewSerializer(
+        data={
+            "occupancy": "LOW",
+            "is_like": False,
+        },
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
     )
-    serializer = ReviewSerializer(instance=review)
-    user_data = serializer.data["user"]
-    assert user_data["id"] == user.id
-    assert user_data["username"] == user.username
+
+    assert serializer.is_valid(), serializer.errors
+    review = serializer.save()
+
+    assert review.attributes == []
+
+
+@pytest.mark.django_db
+def test_serializer_user_is_read_only(api_request, parking_point):
+    """
+    user nie może być nadpisany w payloadzie
+    """
+    user = api_request.user
+    other_user = User.objects.create_user(
+        username="hacker",
+        password="password123",
+        email="hacker@localhost.com",
+    )
+
+    serializer = ReviewSerializer(
+        data={
+            "occupancy": "HIGH",
+            "is_like": False,
+            "user": other_user.id,
+        },
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
+    )
+
+    assert serializer.is_valid(), serializer.errors
+    review = serializer.save()
+
+    assert review.user == user
+
+
+@pytest.mark.django_db
+def test_serializer_output_contains_user_data(api_request, parking_point):
+    """
+    get_user() zwraca id i username
+    """
+    serializer = ReviewSerializer(
+        data={
+            "occupancy": "MEDIUM",
+            "is_like": False,
+        },
+        context={
+            "request": api_request,
+            "parking_point": parking_point,
+        },
+    )
+
+    serializer.is_valid(raise_exception=True)
+    review = serializer.save()
+
+    output = ReviewSerializer(review).data
+    assert output["user"]["id"] == api_request.user.id
+    assert output["user"]["username"] == api_request.user.username

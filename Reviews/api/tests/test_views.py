@@ -1,32 +1,15 @@
 import pytest
-from rest_framework import status
-from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from parking_point.models import ParkingPoint
+from rest_framework.test import APIClient
 from Reviews.models import Review
+from parking_point.models import ParkingPoint
 
 User = get_user_model()
 
 
-@pytest.fixture
-def user():
-    return User.objects.create_user(
-        username="user1", email="user1@test.com", password="pass"
-    )
-
-
-@pytest.fixture
-def owner_user():
-    return User.objects.create_user(
-        username="owner", email="owner@test.com", password="pass"
-    )
-
-
-@pytest.fixture
-def parking_point(owner_user):
-    return ParkingPoint.objects.create(
-        location={"lat": 52.0, "lng": 21.0}, user=owner_user
-    )
+# -----------------------
+# FIXTURES
+# -----------------------
 
 
 @pytest.fixture
@@ -34,63 +17,188 @@ def api_client():
     return APIClient()
 
 
-@pytest.mark.django_db
-def test_get_reviews_empty(api_client, parking_point, user):
-    api_client.force_authenticate(user=user)
-    response = api_client.get(f"/api/parking-points/{parking_point.id}/reviews/")
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data == []
+@pytest.fixture
+def user(db):
+    return User.objects.create_user(
+        username="testuser",
+        password="password123",
+        email="testemail@testuser.com",
+    )
+
+
+@pytest.fixture
+def other_user(db):
+    return User.objects.create_user(
+        username="otheruser",
+        password="password123",
+        email="otheremail@otheruser.com",
+    )
+
+
+@pytest.fixture
+def parking_point(db, user):
+    return ParkingPoint.objects.create(
+        user=user,
+        location={"lat": 52.0, "lng": 21.0},
+    )
+
+
+# -----------------------
+# TESTS
+# -----------------------
 
 
 @pytest.mark.django_db
-def test_post_review_creates(api_client, parking_point, user):
+def test_create_review(api_client, user, parking_point):
+    """
+    Pierwszy POST tworzy review
+    """
     api_client.force_authenticate(user=user)
-    data = {
-        "occupancy": Review.Occupancy.HIGH,
+    url = f"/api/parking-points/{parking_point.id}/reviews/"
+
+    payload = {
+        "occupancy": "HIGH",
+        "attributes": ["POOR_SURFACE"],
+        "description": "Pierwsza opinia",
         "is_like": False,
-        "attributes": [Review.Attributes.POOR_SURFACE],
-        "description": "Dobra lokalizacja",
     }
-    response = api_client.post(
-        f"/api/parking-points/{parking_point.id}/reviews/", data, format="json"
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    assert Review.objects.filter(parking_point=parking_point, user=user).exists()
-    review = Review.objects.get(parking_point=parking_point, user=user)
-    assert review.occupancy == Review.Occupancy.HIGH
+
+    response = api_client.post(url, payload, format="json")
+
+    assert response.status_code == 201
+    assert Review.objects.count() == 1
+
+    review = Review.objects.get()
+    assert review.user == user
+    assert review.parking_point == parking_point
+    assert review.occupancy == "HIGH"
+    assert review.description == "Pierwsza opinia"
 
 
 @pytest.mark.django_db
-def test_post_review_owner_sets_is_like(api_client, parking_point, owner_user):
-    api_client.force_authenticate(user=owner_user)
-    data = {
-        "occupancy": Review.Occupancy.MEDIUM,
-        "attributes": [Review.Attributes.FLOOD_PRONE],
-        "description": "Test dla właściciela",
-    }
-    response = api_client.post(
-        f"/api/parking-points/{parking_point.id}/reviews/", data, format="json"
+def test_second_post_updates_existing_review(api_client, user, parking_point):
+    """
+    Drugi POST nadpisuje istniejące review (UPSERT)
+    """
+    api_client.force_authenticate(user=user)
+    url = f"/api/parking-points/{parking_point.id}/reviews/"
+
+    api_client.post(
+        url,
+        {
+            "occupancy": "LOW",
+            "attributes": ["HARD_ACCESS"],
+            "description": "Stara wersja",
+            "is_like": False,
+        },
+        format="json",
     )
-    assert response.status_code == status.HTTP_201_CREATED
-    review = Review.objects.get(parking_point=parking_point, user=owner_user)
-    # is_like automatycznie ustawione na True
+
+    api_client.post(
+        url,
+        {
+            "occupancy": "HIGH",
+            "attributes": ["POOR_LIGHTING"],
+            "description": "Nowa wersja",
+            "is_like": False,
+        },
+        format="json",
+    )
+
+    assert Review.objects.count() == 1
+
+    review = Review.objects.get()
+    assert review.occupancy == "HIGH"
+    assert review.description == "Nowa wersja"
+    assert review.attributes == ["POOR_LIGHTING"]
+
+
+@pytest.mark.django_db
+def test_different_users_can_review_same_parking_point(
+    api_client, user, other_user, parking_point
+):
+    """
+    Różni użytkownicy mogą dodać review do tego samego parking pointa
+    """
+
+    api_client.force_authenticate(user=user)
+    url = f"/api/parking-points/{parking_point.id}/reviews/"
+    api_client.post(
+        url,
+        {
+            "occupancy": "LOW",
+            "attributes": [],
+            "description": "User 1",
+            "is_like": False,
+        },
+        format="json",
+    )
+
+    api_client.force_authenticate(user=other_user)
+    api_client.post(
+        url,
+        {
+            "occupancy": "HIGH",
+            "attributes": [],
+            "description": "User 2",
+            "is_like": False,
+        },
+        format="json",
+    )
+
+    assert Review.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_owner_review_sets_is_like_true(api_client, user, parking_point):
+    """
+    Właściciel parking pointa zawsze ma is_like=True
+    """
+    api_client.force_authenticate(user=user)
+    url = f"/api/parking-points/{parking_point.id}/reviews/"
+    api_client.post(
+        url,
+        {
+            "occupancy": "MEDIUM",
+            "attributes": [],
+            "description": "Owner review",
+            "is_like": False,  # frontend może wysłać False
+        },
+        format="json",
+    )
+
+    review = Review.objects.get()
     assert review.is_like is True
 
 
 @pytest.mark.django_db
-def test_post_duplicate_review_returns_error(api_client, parking_point, user):
+def test_list_reviews_for_parking_point(api_client, user, parking_point):
+    """
+    GET zwraca listę review dla parking pointa
+    """
     api_client.force_authenticate(user=user)
-    Review.objects.create(
-        parking_point=parking_point,
-        user=user,
-        occupancy=Review.Occupancy.HIGH,
-        is_like=True,
-    )
-    data = {"occupancy": Review.Occupancy.LOW, "is_like": False}
+    url = f"/api/parking-points/{parking_point.id}/reviews/"
+    response = api_client.get(url)
+
+    assert response.status_code == 200
+    assert isinstance(response.data, list)
+
+
+@pytest.mark.django_db
+def test_authentication_required(api_client, parking_point):
+    """
+    Endpoint wymaga uwierzytelnienia
+    """
+    url = f"/api/parking-points/{parking_point.id}/reviews/"
     response = api_client.post(
-        f"/api/parking-points/{parking_point.id}/reviews/", data, format="json"
+        url,
+        {
+            "occupancy": "HIGH",
+            "attributes": [],
+            "description": "No auth",
+            "is_like": False,
+        },
+        format="json",
     )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Możesz dodać tylko jedną recenzję dla tego parking point." in str(
-        response.data
-    )
+
+    assert response.status_code == 401

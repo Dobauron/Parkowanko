@@ -4,7 +4,6 @@ from Reviews.api.validators import (
     validate_attributes,
     validate_occupancy,
     validate_no_profanity,
-    validate_unique_review,
 )
 from Reviews.models import Review
 from parking_point.models import ParkingPoint
@@ -90,54 +89,3 @@ def test_validate_no_profanity_clean_text():
 def test_validate_no_profanity_blocked_text(bad_word):
     with pytest.raises(ValidationError):
         validate_no_profanity(f"To zawiera {bad_word}")
-
-
-# ============================================================
-# validate_unique_review
-# ============================================================
-
-
-@pytest.mark.django_db
-def test_validate_unique_review_allows_new_review(user_factory, parking_point_factory):
-    user = user_factory("user1")
-    pp = parking_point_factory(user=user)
-
-    class DummySerializer:
-        context = {"request": type("Request", (), {"user": user})()}
-        instance = None
-
-    serializer = DummySerializer()
-    attrs = {"parking_point": pp}
-
-    # Funkcja dummy musi przyjmować dwa argumenty: self, attrs
-    def dummy_validate(self, attrs):
-        return attrs
-
-    wrapper = validate_unique_review(dummy_validate)
-    assert wrapper(serializer, attrs) == attrs
-
-
-@pytest.mark.django_db
-def test_validate_unique_review_blocks_duplicate(user_factory, parking_point_factory):
-    user = user_factory("user2")
-    pp = parking_point_factory(user=user)
-
-    Review.objects.create(
-        user=user, parking_point=pp, occupancy=Review.Occupancy.HIGH, is_like=True
-    )
-
-    class DummySerializer:
-        context = {"request": type("Request", (), {"user": user})()}
-        instance = None
-
-    serializer = DummySerializer()
-    attrs = {"parking_point": pp}
-
-    def dummy_validate(self, attrs):
-        return attrs
-
-    wrapper = validate_unique_review(dummy_validate)
-    import pytest
-
-    with pytest.raises(ValidationError):
-        wrapper(serializer, attrs)

@@ -2,7 +2,6 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from ..models import Review
 from .serializers import ReviewSerializer
-from django.db import IntegrityError
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -63,8 +62,4 @@ class ReviewAPICreateListView(ListCreateAPIView):
         if parking_point is None:
             raise ValidationError({"error": "Brak obiektu parking point."})
 
-        user = self.request.user
-        try:
-            serializer.save(user=user, parking_point=parking_point)
-        except IntegrityError:
-            raise ValidationError({"error": "Już zgłosiłeś to miejsce."})
+        serializer.save()
