@@ -7,6 +7,7 @@ from .validators import (
 )
 from django.db import transaction
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     parking_point_id = serializers.IntegerField(
@@ -59,7 +60,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         parking_point = self.context["parking_point"]
 
         # zabezpieczenie transakcyjne
-        with transaction.atomic(): # albo cały blok kodu wykona się w całości, albo nie zapisze się nic
+        with transaction.atomic():  # albo cały blok kodu wykona się w całości, albo nie zapisze się nic
             review, created = Review.objects.update_or_create(
                 user=user,
                 parking_point=parking_point,
