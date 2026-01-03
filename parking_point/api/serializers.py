@@ -23,11 +23,13 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "like_count",
             "dislike_count",
         )
+
     def get_user(self, obj):
         return {
             "id": obj.user_id,
             "username": obj.user.username,
         }
+
     def get_like_count(self, obj):
         return getattr(obj, "like_count", 0)
 
