@@ -1,15 +1,10 @@
 from django.urls import path, include
-from .views import ParkingPointEditLocationView, ParkingPointEditLocationVoteView
+from .views import ParkingPointEditLocationView
 
 urlpatterns = [
     path(
         "",
         ParkingPointEditLocationView.as_view(),
         name="edit-location",
-    ),
-    path(
-        "vote/",
-        ParkingPointEditLocationVoteView.as_view(),
-        name="edit-location-vote",
     ),
 ]

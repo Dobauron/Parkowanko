@@ -1,6 +1,5 @@
 from parking_point_edit_location.models import (
     ParkingPointEditLocation,
-    ParkingPointEditLocationVote,
 )
 
 

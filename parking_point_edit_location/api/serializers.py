@@ -1,12 +1,8 @@
 from rest_framework import serializers
-from ..models import ParkingPointEditLocation, ParkingPointEditLocationVote
+from ..models import ParkingPointEditLocation
 from .validators import (
     validate_distance,
-    validate_no_existing_proposal,
     validate_location_structure,
-    validate_has_edit_location_proposal,
-    validate_proposal_exists,
-    validate_user_not_voted,
 )
 
 
@@ -32,7 +28,6 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
         return obj.votes.filter(is_like=False).count()
 
     @validate_location_structure()
-    @validate_no_existing_proposal()
     @validate_distance(min_distance=20, max_distance=100)
     def validate(self, attrs):
         """
@@ -45,22 +40,3 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class ParkingPointEditLocationVoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ParkingPointEditLocationVote
-        fields = ["is_like"]
-
-    @validate_has_edit_location_proposal()
-    @validate_proposal_exists()
-    @validate_user_not_voted()
-    def validate(self, attrs):
-        """
-        Wszystkie walidacje są w dekoratorach
-        """
-        # Tutaj możesz dodać dodatkowe walidacje jeśli potrzebujesz
-        # np. sprawdzenie czy is_like jest bool
-        is_like = attrs.get("is_like")
-        if not isinstance(is_like, bool):
-            raise serializers.ValidationError({"is_like": "Musi być true lub false."})
-
-        return attrs

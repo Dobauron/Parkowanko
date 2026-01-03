@@ -19,21 +19,3 @@ class ParkingPointEditLocation(models.Model):
     def __str__(self):
         return f"{self.user} want edit ParkingPoint id = {self.parking_point}"
 
-
-class ParkingPointEditLocationVote(models.Model):
-    parking_point_edit_location = models.ForeignKey(
-        ParkingPointEditLocation, on_delete=models.CASCADE, related_name="votes"
-    )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    is_like = models.BooleanField(default=False, null=True, blank=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = (
-            "parking_point_edit_location",
-            "user",
-        )  # jeden użytkownik jeden głos
-
-    def __str__(self):
-        return f"{self.user} voted for {self.parking_point_edit_location}"

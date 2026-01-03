@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from ..models import ParkingPointEditLocation, ParkingPointEditLocationVote
+from ..models import ParkingPointEditLocation
 from parking_point.api.validators import haversine
 
 
@@ -79,37 +79,6 @@ def validate_location_structure():
     return decorator
 
 
-def validate_no_existing_proposal():
-    """
-    Waliduje czy już istnieje jakakolwiek propozycja edycji dla tego parking point
-    (sprawdza pole has_edit_location_proposal w ParkingPoint)
-    """
-
-    def decorator(validate_method):
-        def wrapper(self, attrs):
-            parking_point = self.context.get("parking_point")
-
-            if not parking_point:
-                raise serializers.ValidationError(
-                    {"parking_point": "Parking point jest wymagany w kontekście."}
-                )
-
-            # ✅ POPRAWNE: Sprawdzamy flagę has_edit_location_proposal w ParkingPoint
-            if parking_point.has_edit_location_proposal:
-                raise serializers.ValidationError(
-                    {
-                        "parking_point": "Dla tego punktu parkingowego już złożono propozycję edycji lokalizacji. "
-                        "Nie można dodać kolejnej dopóki obecna nie zostanie rozpatrzona."
-                    }
-                )
-
-            return validate_method(self, attrs)
-
-        return wrapper
-
-    return decorator
-
-
 def validate_distance(min_distance=20, max_distance=100):
     """
     JEDEN walidator który sprawdza zakres odległości 20-100 metrów
@@ -166,83 +135,3 @@ def validate_distance(min_distance=20, max_distance=100):
 
     return decorator
 
-
-# validation for vote from here
-def validate_user_not_voted():
-    """
-    Waliduje czy użytkownik już nie głosował na tę propozycję
-    """
-
-    def decorator(validate_method):
-        def wrapper(self, attrs):
-            request = self.context.get("request")
-            proposal = self.context.get("proposal")
-
-            if not request or not request.user.is_authenticated:
-                raise serializers.ValidationError("Musisz być zalogowany.")
-
-            if self.context.get("method") == "PUT":
-                return validate_method(self, attrs)
-
-            if not proposal:
-                raise serializers.ValidationError("Brak propozycji w kontekście.")
-
-            # Sprawdź czy już głosował
-            if ParkingPointEditLocationVote.objects.filter(
-                user=request.user, parking_point_edit_location=proposal
-            ).exists():
-                raise serializers.ValidationError("Już oddałeś głos na tę propozycję.")
-
-            return validate_method(self, attrs)
-
-        return wrapper
-
-    return decorator
-
-
-def validate_proposal_exists():
-    """
-    Waliduje czy propozycja jeszcze istnieje
-    """
-
-    def decorator(validate_method):
-        def wrapper(self, attrs):
-            proposal = self.context.get("proposal")
-
-            if not proposal:
-                raise serializers.ValidationError("Brak propozycji.")
-
-            # Sprawdź czy propozycja nie została usunięta
-            if not ParkingPointEditLocation.objects.filter(id=proposal.id).exists():
-                raise serializers.ValidationError("Propozycja została już rozpatrzona.")
-
-            return validate_method(self, attrs)
-
-        return wrapper
-
-    return decorator
-
-
-def validate_has_edit_location_proposal():
-    """
-    Waliduje czy parking point ma aktywną propozycję
-    """
-
-    def decorator(validate_method):
-        def wrapper(self, attrs):
-            proposal = self.context.get("proposal")
-
-            if not proposal:
-                raise serializers.ValidationError(
-                    "Ten punkt nie ma aktywnej propozycji."
-                )
-
-            # Sprawdź czy parking point ma flagę has_edit_location_proposal
-            if not proposal.parking_point.has_edit_location_proposal:
-                raise serializers.ValidationError("Propozycja jest nieaktywna.")
-
-            return validate_method(self, attrs)
-
-        return wrapper
-
-    return decorator
