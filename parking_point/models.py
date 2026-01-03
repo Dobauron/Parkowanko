@@ -22,7 +22,7 @@ class ParkingPoint(models.Model):
         auto_now=True, verbose_name="Ostatnia aktualizacja"
     )
     is_verified = models.BooleanField(default=False)
-    has_edit_location_proposal = models.BooleanField(default=False)
+    address = models.CharField(max_length=255, verbose_name="Address")
 
     def __str__(self):
-        return str(self.id)
+        return str(self.address)

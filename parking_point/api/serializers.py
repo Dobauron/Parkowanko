@@ -7,8 +7,7 @@ from ..models import ParkingPoint
 
 
 class ParkingPointSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
     like_count = serializers.SerializerMethodField()
     dislike_count = serializers.SerializerMethodField()
 
@@ -21,10 +20,15 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "updated_at",
             "is_verified",
             "user",
-            "has_edit_location_proposal",
             "like_count",
             "dislike_count",
         )
+
+    def get_user(self, obj):
+        return {
+            "id": obj.user_id,
+            "username": obj.user.username,
+        }
 
     def get_like_count(self, obj):
         return getattr(obj, "like_count", 0)

@@ -91,4 +91,6 @@ def test_post_duplicate_review_returns_error(api_client, parking_point, user):
         f"/api/parking-points/{parking_point.id}/reviews/", data, format="json"
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Możesz dodać tylko jedną recenzję dla tego parking point." in str(response.data)
+    assert "Możesz dodać tylko jedną recenzję dla tego parking point." in str(
+        response.data
+    )
