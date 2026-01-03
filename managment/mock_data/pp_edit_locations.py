@@ -1,11 +1,9 @@
-from parking_point_edit_location.models import (
-    ParkingPointEditLocation,
-)
+from parking_point_edit_location.models import ParkingPointEditLocation
 
 
 def create_edit_locations(users, parking_points):
     """
-    Tworzy propozycje edycji lokalizacji + głosy
+    Tworzy propozycje edycji lokalizacji ParkingPoint
     """
 
     edit_locations_data = [
@@ -26,14 +24,13 @@ def create_edit_locations(users, parking_points):
     created_edits = {}
 
     for data in edit_locations_data:
-        edit, created = ParkingPointEditLocation.objects.get_or_create(
+        edit, _ = ParkingPointEditLocation.objects.get_or_create(
             parking_point=data["parking_point"],
             defaults={
                 "user": data["user"],
                 "location": data["location"],
             },
         )
-
         created_edits[data["key"]] = edit
 
     return created_edits
