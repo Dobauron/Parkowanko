@@ -18,4 +18,3 @@ class ParkingPointEditLocation(models.Model):
 
     def __str__(self):
         return f"{self.user} want edit ParkingPoint id = {self.parking_point}"
-

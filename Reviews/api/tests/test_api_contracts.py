@@ -5,6 +5,7 @@ from django.utils.timezone import now
 from parking_point.models import ParkingPoint
 from Reviews.models import Review
 from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
 
@@ -14,20 +15,16 @@ class TestReviewAPIContract:
         self.client = APIClient()
 
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@test.com",
-            password="password123"
+            username="testuser", email="test@test.com", password="password123"
         )
 
         self.parking_owner = User.objects.create_user(
-            username="owner",
-            email="owner@owner.com",
-            password="password123"
+            username="owner", email="owner@owner.com", password="password123"
         )
 
         self.parking_point = ParkingPoint.objects.create(
             user=self.parking_owner,
-            location= {"lat": 52.22977, "lng": 21.01178},
+            location={"lat": 52.22977, "lng": 21.01178},
         )
 
         self.url = reverse(

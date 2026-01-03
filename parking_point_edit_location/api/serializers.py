@@ -38,5 +38,3 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
         """
         # Tutaj możesz dodać inne walidacje jeśli potrzebujesz
         return attrs
-
-

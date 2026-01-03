@@ -17,6 +17,7 @@ class ParkingPointEditLocationView(CreateAPIView):
     def get_parking_point(self):
         pk = self.kwargs.get("pk")
         return get_object_or_404(ParkingPoint, pk=pk)
+
     #
     # --------- POST ----------
     #
@@ -40,6 +41,3 @@ class ParkingPointEditLocationView(CreateAPIView):
 
         # Zwracamy te same dane co GET
         return Response(self.get_serializer(obj).data, status=201)
-
-
-

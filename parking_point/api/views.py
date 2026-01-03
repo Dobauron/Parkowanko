@@ -8,7 +8,9 @@ from Reviews.models import Review
 from Reviews.api.serializers import ReviewSerializer
 from rest_framework.decorators import action
 from parking_point_edit_location.models import ParkingPointEditLocation
-from parking_point_edit_location.api.serializers import ParkingPointEditLocationSerializer
+from parking_point_edit_location.api.serializers import (
+    ParkingPointEditLocationSerializer,
+)
 
 from django.db.models import Count, Q
 

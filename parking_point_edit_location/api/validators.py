@@ -134,4 +134,3 @@ def validate_distance(min_distance=20, max_distance=100):
         return wrapper
 
     return decorator
-
