@@ -12,6 +12,7 @@ User = get_user_model()
 # FIXTURES
 # -----------------------
 
+
 @pytest.fixture
 def api_client_request_factory():
     return APIRequestFactory()
@@ -47,6 +48,7 @@ def api_request(api_client_request_factory, user):
 # -----------------------
 # TESTS
 # -----------------------
+
 
 @pytest.mark.django_db
 def test_serializer_creates_review(api_request, parking_point, user):

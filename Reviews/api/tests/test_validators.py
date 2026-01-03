@@ -89,4 +89,3 @@ def test_validate_no_profanity_clean_text():
 def test_validate_no_profanity_blocked_text(bad_word):
     with pytest.raises(ValidationError):
         validate_no_profanity(f"To zawiera {bad_word}")
-
