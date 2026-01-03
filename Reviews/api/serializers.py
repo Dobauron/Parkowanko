@@ -3,10 +3,9 @@ from ..models import Review
 from .validators import (
     validate_attributes,
     validate_occupancy,
-    validate_unique_review,
     validate_no_profanity,
 )
-
+from django.db import transaction
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
@@ -54,10 +53,17 @@ class ReviewSerializer(serializers.ModelSerializer):
             "username": obj.user.username,
         }
 
-    @validate_unique_review
-    def validate(self, attrs):
-        # jeśli walidator potrzebuje parking_point, pobiera go z kontekstu:
-        attrs["parking_point"] = attrs.get("parking_point") or self.context.get(
-            "parking_point"
-        )
-        return attrs
+    def create(self, validated_data):
+        request = self.context["request"]
+        user = request.user
+        parking_point = self.context["parking_point"]
+
+        # zabezpieczenie transakcyjne
+        with transaction.atomic(): # albo cały blok kodu wykona się w całości, albo nie zapisze się nic
+            review, created = Review.objects.update_or_create(
+                user=user,
+                parking_point=parking_point,
+                defaults=validated_data,
+            )
+
+        return review
