@@ -24,6 +24,18 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
             "username": obj.user.username,
         }
 
+    def upsert(self, validated_data):
+        user = self.context["request"].user
+        parking_point = self.context["parking_point"]
+
+        obj, created = ParkingPointEditLocation.objects.update_or_create(
+            user=user,
+            parking_point=parking_point,
+            defaults={"location": validated_data["location"]},
+        )
+        return obj, created
+
+
     @validate_location_structure()
     @validate_distance(min_distance=40, max_distance=100)
     def validate(self, attrs):
