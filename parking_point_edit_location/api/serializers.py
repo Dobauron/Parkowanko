@@ -35,7 +35,6 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
         )
         return obj, created
 
-
     @validate_location_structure()
     @validate_distance(min_distance=40, max_distance=100)
     def validate(self, attrs):
