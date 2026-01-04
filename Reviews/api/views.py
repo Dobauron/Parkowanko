@@ -63,3 +63,14 @@ class ReviewAPICreateListView(ListCreateAPIView):
             raise ValidationError({"error": "Brak obiektu parking point."})
 
         serializer.save()
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        obj, created = serializer.upsert(serializer.validated_data)
+
+        return Response(
+            self.get_serializer(obj).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
