@@ -5,5 +5,5 @@ class ReportPoiConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "Reviews"
 
-    def ready(self):
-        import Reviews.signals
+    # def ready(self):
+    #     import Reviews.signals

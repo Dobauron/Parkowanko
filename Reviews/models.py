@@ -26,6 +26,8 @@ class Review(models.Model):
         NO_DATA = "NO_DATA", _("Brak danych")
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # nie można usunać PP kiedy istnieje recenzja
     parking_point = models.ForeignKey(
         ParkingPoint, on_delete=models.PROTECT, related_name="reviews"
     )
