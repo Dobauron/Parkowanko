@@ -21,8 +21,9 @@ class ParkingPoint(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True, verbose_name="Ostatnia aktualizacja"
     )
-    is_verified = models.BooleanField(default=False)
-    address = models.CharField(max_length=255, verbose_name="Address")
+    address = models.CharField(
+        max_length=255, verbose_name="Address", null=True, blank=True
+    )
 
     def __str__(self):
         return str(self.address)

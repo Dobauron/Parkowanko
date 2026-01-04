@@ -18,7 +18,6 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "id",
             "created_at",
             "updated_at",
-            "is_verified",
             "user",
             "like_count",
             "dislike_count",

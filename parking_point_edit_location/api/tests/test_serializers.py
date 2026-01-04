@@ -2,7 +2,9 @@ import pytest
 from rest_framework import serializers
 from parking_point.models import ParkingPoint
 from parking_point_edit_location.models import ParkingPointEditLocation
-from parking_point_edit_location.api.serializers import ParkingPointEditLocationSerializer
+from parking_point_edit_location.api.serializers import (
+    ParkingPointEditLocationSerializer,
+)
 
 # ============================================================
 # Fixtures
@@ -28,9 +30,7 @@ def user_factory(db, django_user_model):
 @pytest.fixture
 def parking_point(user_factory):
     user = user_factory()
-    return ParkingPoint.objects.create(
-        location={"lat": 52.0, "lng": 21.0}, user=user
-    )
+    return ParkingPoint.objects.create(location={"lat": 52.0, "lng": 21.0}, user=user)
 
 
 @pytest.fixture
@@ -68,5 +68,3 @@ def test_create_edit_location_serializer_too_close(parking_point, user_factory):
     )
     assert not serializer.is_valid()
     assert "zbyt blisko" in str(serializer.errors.get("location", ""))
-
-

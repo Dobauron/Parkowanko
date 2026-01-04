@@ -52,7 +52,6 @@ def proposal(user_factory, parking_point):
 # ---------------------------------------------------------
 
 
-
 @pytest.mark.django_db
 def test_post_edit_location_requires_auth(api_client, parking_point):
     response = api_client.post(
