@@ -54,17 +54,13 @@ class ReviewSerializer(serializers.ModelSerializer):
             "username": obj.user.username,
         }
 
-    def create(self, validated_data):
-        request = self.context["request"]
-        user = request.user
+    def upsert(self, validated_data):
+        user = self.context["request"].user
         parking_point = self.context["parking_point"]
 
-        # zabezpieczenie transakcyjne
-        with transaction.atomic():  # albo cały blok kodu wykona się w całości, albo nie zapisze się nic
-            review, created = Review.objects.update_or_create(
-                user=user,
-                parking_point=parking_point,
-                defaults=validated_data,
-            )
-
-        return review
+        obj, created = Review.objects.update_or_create(
+            user=user,
+            parking_point=parking_point,
+            defaults=validated_data,
+        )
+        return obj, created
