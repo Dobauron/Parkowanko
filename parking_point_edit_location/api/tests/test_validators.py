@@ -106,6 +106,7 @@ def test_validate_location_structure_invalid(location):
     assert not serializer.is_valid()
     assert "location" in serializer.errors
 
+
 # ============================================================
 #  validate_distance
 # ============================================================
@@ -165,5 +166,3 @@ def test_validate_distance_too_far(parking_point):
 
     assert not serializer.is_valid()
     assert "zbyt daleko" in serializer.errors["location"][0]
-
-
