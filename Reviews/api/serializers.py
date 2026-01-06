@@ -5,14 +5,14 @@ from .validators import (
     validate_occupancy,
     validate_no_profanity,
 )
-from django.db import transaction
-
+from drf_spectacular.utils import extend_schema_field
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     parking_point_id = serializers.IntegerField(
         source="parking_point.id", read_only=True
     )
+
     attributes = serializers.ListField(
         child=serializers.CharField(validators=[validate_attributes]),
         required=False,
@@ -26,6 +26,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         allow_null=True,
         allow_blank=True,
     )
+
     description = serializers.CharField(
         required=False,
         allow_blank=True,
@@ -40,27 +41,16 @@ class ReviewSerializer(serializers.ModelSerializer):
             "attributes",
             "occupancy",
             "description",
-            "created_at",
             "is_like",
             "user",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
+    @extend_schema_field(serializers.DictField)
     def get_user(self, obj):
         return {
             "id": obj.user_id,
             "username": obj.user.username,
         }
-
-    def upsert(self, validated_data):
-        user = self.context["request"].user
-        parking_point = self.context["parking_point"]
-
-        obj, created = Review.objects.update_or_create(
-            user=user,
-            parking_point=parking_point,
-            defaults=validated_data,
-        )
-        return obj, created
