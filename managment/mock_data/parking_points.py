@@ -2,35 +2,39 @@ from parking_point.models import ParkingPoint
 
 
 def create_parking_points(users):
+    """
+    Tworzy ParkingPointy z przykładowymi lokalizacjami.
+    users: dict z utworzonymi użytkownikami (Account)
+    """
     parking_points_data = [
         {
             "key": "warszawa_centrum",
             "user": users["alice"],
-            "location": {"lat": 52.22977, "lng": 21.01178},
+            "original_location": {"lat": 52.22977, "lng": 21.01178},
             "address": "Warszawa, Centrum",
         },
         {
             "key": "krakow_rynek",
             "user": users["bob"],
-            "location": {"lat": 50.06143, "lng": 19.93658},
+            "original_location": {"lat": 50.06143, "lng": 19.93658},
             "address": "Kraków, Rynek Główny",
         },
         {
             "key": "gdansk_molo",
             "user": users["charlie"],
-            "location": {"lat": 54.44469, "lng": 18.56722},
+            "original_location": {"lat": 54.44469, "lng": 18.56722},
             "address": "Gdańsk, Molo",
         },
         {
             "key": "poznan_stare_miasto",
             "user": users["diana"],
-            "location": {"lat": 52.40828, "lng": 16.93352},
+            "original_location": {"lat": 52.40828, "lng": 16.93352},
             "address": "Poznań, Stare Miasto",
         },
         {
             "key": "wroclaw_rynek",
             "user": users["alice"],
-            "location": {"lat": 51.10933, "lng": 17.03258},
+            "original_location": {"lat": 51.10933, "lng": 17.03258},
             "address": "Wrocław, Rynek",
         },
     ]
@@ -39,9 +43,10 @@ def create_parking_points(users):
 
     for data in parking_points_data:
         pp, _ = ParkingPoint.objects.get_or_create(
-            location=data["location"],
+            original_location=data["original_location"],
             defaults={
                 "user": data["user"],
+                "current_location": None,
                 "address": data["address"],
             },
         )

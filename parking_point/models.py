@@ -14,8 +14,12 @@ class ParkingPoint(models.Model):
         related_name="parking_point",
     )
     # Pole dla szerokości i długości geograficznej
-    location = models.JSONField(verbose_name="coordynaty", null=False, blank=False)
-
+    original_location = models.JSONField(
+        verbose_name="original-coordinates", null=False, blank=False
+    )
+    current_location = models.JSONField(
+        verbose_name="current-location", null=True, blank=True
+    )
     # Metadane czasowe
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Utworzono")
     updated_at = models.DateTimeField(
@@ -27,3 +31,10 @@ class ParkingPoint(models.Model):
 
     def __str__(self):
         return str(self.address)
+
+    def recompute_location(self):
+        from parking_point.utils.location_clustering import (
+            update_parking_point_location,
+        )
+
+        update_parking_point_location(self)
