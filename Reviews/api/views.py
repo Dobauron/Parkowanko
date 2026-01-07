@@ -84,10 +84,6 @@ class ParkingPointReviewsListAPIView(ListAPIView):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        parking_point = get_object_or_404(
-            ParkingPoint, pk=self.kwargs["pk"]
-        )
+        parking_point = get_object_or_404(ParkingPoint, pk=self.kwargs["pk"])
 
-        return Review.objects.filter(
-            parking_point=parking_point
-        ).select_related("user")
+        return Review.objects.filter(parking_point=parking_point).select_related("user")

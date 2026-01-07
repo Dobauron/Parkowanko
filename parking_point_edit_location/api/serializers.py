@@ -3,6 +3,7 @@ from ..models import ParkingPointEditLocation
 from .validators import validate_location_structure
 from drf_spectacular.utils import extend_schema_field
 
+
 class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
     parkingPointId = serializers.IntegerField(source="parking_point.id", read_only=True)
     user = serializers.SerializerMethodField(read_only=True)

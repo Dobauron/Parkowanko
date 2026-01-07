@@ -7,6 +7,7 @@ from .validators import (
 )
 from drf_spectacular.utils import extend_schema_field
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     parking_point_id = serializers.IntegerField(

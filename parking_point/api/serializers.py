@@ -6,6 +6,7 @@ from .validators import (
 from ..models import ParkingPoint
 from drf_spectacular.utils import extend_schema_field
 
+
 class ParkingPointSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     like_count = serializers.SerializerMethodField()
