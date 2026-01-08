@@ -15,9 +15,7 @@ class TestParkingPointLocationConsensus:
         # Tworzy zestaw użytkowników testowych
         return [
             User.objects.create_user(
-                email=f"user{i}@test.pl",
-                username=f"user{i}",
-                password="test1234"
+                email=f"user{i}@test.pl", username=f"user{i}", password="test1234"
             )
             for i in range(1, 8)
         ]
@@ -28,7 +26,7 @@ class TestParkingPointLocationConsensus:
         return ParkingPoint.objects.create(
             location={"lat": 52.2297, "lng": 21.0122},
             current_location={"lat": 52.2297, "lng": 21.0122},
-            address="Test"
+            address="Test",
         )
 
     # ------------------------------------------------------------
@@ -43,8 +41,16 @@ class TestParkingPointLocationConsensus:
     # Test 2: mniej niż 3 zgłoszenia → brak zmiany lokalizacji
     # ------------------------------------------------------------
     def test_less_than_3_suggestions_fallback(self, parking, users):
-        ParkingPointEditLocation.objects.create(user=users[0], parking_point=parking, location={"lat": 52.22971, "lng": 21.01221})
-        ParkingPointEditLocation.objects.create(user=users[1], parking_point=parking, location={"lat": 52.22972, "lng": 21.01222})
+        ParkingPointEditLocation.objects.create(
+            user=users[0],
+            parking_point=parking,
+            location={"lat": 52.22971, "lng": 21.01221},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[1],
+            parking_point=parking,
+            location={"lat": 52.22972, "lng": 21.01222},
+        )
 
         update_parking_point_location(parking)
         parking.refresh_from_db()
@@ -54,9 +60,21 @@ class TestParkingPointLocationConsensus:
     # Test 3: 3 bliskie zgłoszenia → pinezka ustawiona na medianie
     # ------------------------------------------------------------
     def test_three_close_suggestions_creates_new_location(self, parking, users):
-        ParkingPointEditLocation.objects.create(user=users[0], parking_point=parking, location={"lat": 52.22971, "lng": 21.01221})
-        ParkingPointEditLocation.objects.create(user=users[1], parking_point=parking, location={"lat": 52.22972, "lng": 21.01222})
-        ParkingPointEditLocation.objects.create(user=users[2], parking_point=parking, location={"lat": 52.22973, "lng": 21.01223})
+        ParkingPointEditLocation.objects.create(
+            user=users[0],
+            parking_point=parking,
+            location={"lat": 52.22971, "lng": 21.01221},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[1],
+            parking_point=parking,
+            location={"lat": 52.22972, "lng": 21.01222},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[2],
+            parking_point=parking,
+            location={"lat": 52.22973, "lng": 21.01223},
+        )
 
         update_parking_point_location(parking)
         parking.refresh_from_db()
@@ -68,15 +86,43 @@ class TestParkingPointLocationConsensus:
     # ------------------------------------------------------------
     def test_two_clusters_bigger_wins(self, parking, users):
         # klaster 1 (3 osoby)
-        ParkingPointEditLocation.objects.create(user=users[0], parking_point=parking, location={"lat": 52.22971, "lng": 21.01221})
-        ParkingPointEditLocation.objects.create(user=users[1], parking_point=parking, location={"lat": 52.22972, "lng": 21.01222})
-        ParkingPointEditLocation.objects.create(user=users[2], parking_point=parking, location={"lat": 52.22973, "lng": 21.01223})
+        ParkingPointEditLocation.objects.create(
+            user=users[0],
+            parking_point=parking,
+            location={"lat": 52.22971, "lng": 21.01221},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[1],
+            parking_point=parking,
+            location={"lat": 52.22972, "lng": 21.01222},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[2],
+            parking_point=parking,
+            location={"lat": 52.22973, "lng": 21.01223},
+        )
 
         # klaster 2 (4 osoby)
-        ParkingPointEditLocation.objects.create(user=users[3], parking_point=parking, location={"lat": 52.23050, "lng": 21.01300})
-        ParkingPointEditLocation.objects.create(user=users[4], parking_point=parking, location={"lat": 52.23051, "lng": 21.01301})
-        ParkingPointEditLocation.objects.create(user=users[5], parking_point=parking, location={"lat": 52.23052, "lng": 21.01302})
-        ParkingPointEditLocation.objects.create(user=users[6], parking_point=parking, location={"lat": 52.23053, "lng": 21.01303})
+        ParkingPointEditLocation.objects.create(
+            user=users[3],
+            parking_point=parking,
+            location={"lat": 52.23050, "lng": 21.01300},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[4],
+            parking_point=parking,
+            location={"lat": 52.23051, "lng": 21.01301},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[5],
+            parking_point=parking,
+            location={"lat": 52.23052, "lng": 21.01302},
+        )
+        ParkingPointEditLocation.objects.create(
+            user=users[6],
+            parking_point=parking,
+            location={"lat": 52.23053, "lng": 21.01303},
+        )
 
         update_parking_point_location(parking)
         parking.refresh_from_db()
@@ -86,9 +132,21 @@ class TestParkingPointLocationConsensus:
     # Test 5: usunięcie zgłoszenia → pinezka wraca do oryginału
     # ------------------------------------------------------------
     def test_delete_recalculates_location(self, parking, users):
-        e1 = ParkingPointEditLocation.objects.create(user=users[0], parking_point=parking, location={"lat": 52.22971, "lng": 21.01221})
-        e2 = ParkingPointEditLocation.objects.create(user=users[1], parking_point=parking, location={"lat": 52.22972, "lng": 21.01222})
-        e3 = ParkingPointEditLocation.objects.create(user=users[2], parking_point=parking, location={"lat": 52.22973, "lng": 21.01223})
+        e1 = ParkingPointEditLocation.objects.create(
+            user=users[0],
+            parking_point=parking,
+            location={"lat": 52.22971, "lng": 21.01221},
+        )
+        e2 = ParkingPointEditLocation.objects.create(
+            user=users[1],
+            parking_point=parking,
+            location={"lat": 52.22972, "lng": 21.01222},
+        )
+        e3 = ParkingPointEditLocation.objects.create(
+            user=users[2],
+            parking_point=parking,
+            location={"lat": 52.22973, "lng": 21.01223},
+        )
 
         update_parking_point_location(parking)
         parking.refresh_from_db()

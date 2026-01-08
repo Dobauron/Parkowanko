@@ -31,7 +31,6 @@ def create_edit_locations(users, parking_points):
             "parking_point": parking_points["warszawa_centrum"],
             "location": {"lat": 52.23052, "lng": 21.01152},
         },
-
         # Klaster 2 (2 osoby – za mało, powinien być ignorowany)
         {
             "key": "warszawa_cluster2_u1",
@@ -45,7 +44,6 @@ def create_edit_locations(users, parking_points):
             "parking_point": parking_points["warszawa_centrum"],
             "location": {"lat": 52.23101, "lng": 21.01201},
         },
-
         # Pojedyncze zgłoszenia dla innych parkingów
         {
             "key": "krakow_edit",

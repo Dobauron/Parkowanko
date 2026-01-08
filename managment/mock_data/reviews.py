@@ -9,17 +9,50 @@ def create_reviews(users, parking_points):
     """
     reviews_data = [
         # pozytywne
-        {"user": users["bob"], "parking_point": parking_points["warszawa_centrum"], "is_like": True, "description": "Dużo miejsc, dobra lokalizacja."},
-        {"user": users["charlie"], "parking_point": parking_points["warszawa_centrum"], "is_like": True, "description": "Bez problemu zaparkowałem."},
-
+        {
+            "user": users["bob"],
+            "parking_point": parking_points["warszawa_centrum"],
+            "is_like": True,
+            "description": "Dużo miejsc, dobra lokalizacja.",
+        },
+        {
+            "user": users["charlie"],
+            "parking_point": parking_points["warszawa_centrum"],
+            "is_like": True,
+            "description": "Bez problemu zaparkowałem.",
+        },
         # negatywne
-        {"user": users["diana"], "parking_point": parking_points["krakow_rynek"], "is_like": False, "description": "Zawsze zajęte."},
-        {"user": users["eve"], "parking_point": parking_points["krakow_rynek"], "is_like": False, "description": "Ciężko ocenić, różnie bywa."},
-
+        {
+            "user": users["diana"],
+            "parking_point": parking_points["krakow_rynek"],
+            "is_like": False,
+            "description": "Zawsze zajęte.",
+        },
+        {
+            "user": users["eve"],
+            "parking_point": parking_points["krakow_rynek"],
+            "is_like": False,
+            "description": "Ciężko ocenić, różnie bywa.",
+        },
         # mieszane / pozytywne
-        {"user": users["alice"], "parking_point": parking_points["gdansk_molo"], "is_like": True, "description": "Blisko morza, super miejscówka."},
-        {"user": users["bob"], "parking_point": parking_points["gdansk_molo"], "is_like": True, "description": "Blisko morza, super miejscówka."},
-        {"user": users["diana"], "parking_point": parking_points["warszawa_centrum"], "is_like": True, "description": "Blisko morza, super miejscówka."},
+        {
+            "user": users["alice"],
+            "parking_point": parking_points["gdansk_molo"],
+            "is_like": True,
+            "description": "Blisko morza, super miejscówka.",
+        },
+        {
+            "user": users["bob"],
+            "parking_point": parking_points["gdansk_molo"],
+            "is_like": True,
+            "description": "Blisko morza, super miejscówka.",
+        },
+        {
+            "user": users["diana"],
+            "parking_point": parking_points["warszawa_centrum"],
+            "is_like": True,
+            "description": "Blisko morza, super miejscówka.",
+        },
     ]
 
     created = []
