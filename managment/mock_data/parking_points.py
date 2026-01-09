@@ -4,8 +4,10 @@ from parking_point.models import ParkingPoint
 def create_parking_points(users):
     """
     Tworzy ParkingPointy z przykładowymi lokalizacjami.
-    users: dict z utworzonymi użytkownikami (Account)
+    original_location = prawda bazowa
+    current_location = None (do czasu pierwszego konsensusu)
     """
+
     parking_points_data = [
         {
             "key": "warszawa_centrum",
@@ -46,8 +48,8 @@ def create_parking_points(users):
             original_location=data["original_location"],
             defaults={
                 "user": data["user"],
-                "current_location": None,
                 "address": data["address"],
+                "current_location": None,  # start rundy
             },
         )
         created[data["key"]] = pp

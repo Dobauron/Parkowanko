@@ -3,6 +3,11 @@ from django.dispatch import receiver
 from .models import ParkingPointEditLocation
 
 
-@receiver([post_save, post_delete], sender=ParkingPointEditLocation)
-def recalc_parking_point_location(sender, instance, **kwargs):
+@receiver(post_save, sender=ParkingPointEditLocation)
+def recompute_on_save(sender, instance, **kwargs):
+    instance.parking_point.recompute_location()
+
+
+@receiver(post_delete, sender=ParkingPointEditLocation)
+def recompute_on_delete(sender, instance, **kwargs):
     instance.parking_point.recompute_location()

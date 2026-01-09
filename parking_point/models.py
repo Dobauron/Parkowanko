@@ -38,3 +38,8 @@ class ParkingPoint(models.Model):
         )
 
         update_parking_point_location(self)
+
+    def save(self, *args, **kwargs):
+        if not self.pk and self.current_location is None:
+            self.current_location = self.original_location
+        super().save(*args, **kwargs)

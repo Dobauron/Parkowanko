@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .validators import (
     reject_invalid_location_structure,
-    reject_too_close_to_other_points,
 )
 from ..models import ParkingPoint
 from drf_spectacular.utils import extend_schema_field
@@ -14,7 +13,6 @@ class ParkingPointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ParkingPoint
-        fields = "__all__"
         read_only_fields = (
             "id",
             "created_at",
@@ -23,6 +21,7 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "like_count",
             "dislike_count",
         )
+        exclude = ["original_location"]
 
     @extend_schema_field(serializers.DictField)
     def get_user(self, obj):
@@ -40,6 +39,6 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         return getattr(obj, "dislike_count", 0)
 
     @reject_invalid_location_structure
-    @reject_too_close_to_other_points(distance_limit=30)
+    # @reject_too_close_to_other_points(distance_limit=30)
     def validate_location(self, location):
         return location
