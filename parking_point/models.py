@@ -17,9 +17,7 @@ class ParkingPoint(models.Model):
     original_location = models.JSONField(
         verbose_name="original-coordinates", null=False, blank=False
     )
-    current_location = models.JSONField(
-        verbose_name="current-location", null=True, blank=True
-    )
+    location = models.JSONField(verbose_name="current-location", null=True, blank=True)
     # Metadane czasowe
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Utworzono")
     updated_at = models.DateTimeField(
@@ -40,6 +38,6 @@ class ParkingPoint(models.Model):
         update_parking_point_location(self)
 
     def save(self, *args, **kwargs):
-        if not self.pk and self.current_location is None:
-            self.current_location = self.original_location
+        if not self.pk and self.location is None:
+            self.location = self.original_location
         super().save(*args, **kwargs)
