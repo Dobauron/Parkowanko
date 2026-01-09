@@ -1,12 +1,12 @@
 from django.urls import path
 from .views import (
-    ReviewCreateUpdateAPIView,
-    ParkingPointReviewsListAPIView,
+    ParkingPointReviewsListCreateAPIView,
+    ReviewUpdateAPIView,
 )
 
 urlpatterns = [
-    # GET → lista recenzji punktu
-    path("", ParkingPointReviewsListAPIView.as_view(), name="reviews-list"),
-    # POST, PUT → moja recenzja dla punktu
-    path("me/", ReviewCreateUpdateAPIView.as_view(), name="my-review"),
+    path(
+        "", ParkingPointReviewsListCreateAPIView.as_view(), name="reviews-list-create"
+    ),
+    path("<int:review_id>/", ReviewUpdateAPIView.as_view(), name="review-update"),
 ]
