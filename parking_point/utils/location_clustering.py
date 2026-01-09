@@ -2,6 +2,7 @@ import numpy as np
 from parking_point.api.validators import haversine
 from parking_point_edit_location.models import ParkingPointEditLocation
 
+
 def cluster_suggestions_by_distance(suggestions, max_distance=25):
     """
     Grupuje zgłoszenia w klastry na podstawie odległości.
@@ -64,10 +65,7 @@ def update_parking_point_location(parking_point):
 
     # 1. zapis nowej lokalizacji
     parking_point.current_location = new_location
-    parking_point.save(update_fields=["current_location"])
+    parking_point.save(update_fields=["location"])
 
     # 2. RESET zgłoszeń
-    ParkingPointEditLocation.objects.filter(
-        parking_point=parking_point
-    ).delete()
-
+    ParkingPointEditLocation.objects.filter(parking_point=parking_point).delete()

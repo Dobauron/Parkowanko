@@ -49,7 +49,7 @@ def create_parking_points(users):
             defaults={
                 "user": data["user"],
                 "address": data["address"],
-                "current_location": None,  # start rundy
+                "location": None,  # start rundy
             },
         )
         created[data["key"]] = pp
