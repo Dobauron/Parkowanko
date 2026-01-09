@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import ParkingPointEditLocation
-from .validators import validate_distance, validate_location_structure
+from .validators import validate_location_structure
+from drf_spectacular.utils import extend_schema_field
 
 
 class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
@@ -18,6 +19,7 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    @extend_schema_field(serializers.DictField)
     def get_user(self, obj):
         return {
             "id": obj.user_id,
@@ -36,7 +38,7 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
         return obj, created
 
     @validate_location_structure()
-    @validate_distance(min_distance=40, max_distance=100)
+    # @validate_distance(min_distance=0, max_distance=100)
     def validate(self, attrs):
         """
         Kolejność walidacji:

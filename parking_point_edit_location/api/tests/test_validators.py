@@ -3,7 +3,6 @@ from rest_framework import serializers
 from rest_framework.test import APIRequestFactory
 from parking_point_edit_location.api.validators import (
     validate_location_structure,
-    validate_distance,
 )
 from parking_point.models import ParkingPoint
 from parking_point_edit_location.models import ParkingPointEditLocation

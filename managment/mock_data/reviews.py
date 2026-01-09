@@ -3,12 +3,12 @@ from Reviews.models import Review
 
 def create_reviews(users, parking_points):
     """
-    users: dict z create_users()
-    parking_points: dict z create_parking_points()
+    Tworzy przykładowe recenzje ParkingPoint.
+    users: dict z Account
+    parking_points: dict z ParkingPoint
     """
-
     reviews_data = [
-        # 👍 pozytywne
+        # pozytywne
         {
             "user": users["bob"],
             "parking_point": parking_points["warszawa_centrum"],
@@ -21,21 +21,20 @@ def create_reviews(users, parking_points):
             "is_like": True,
             "description": "Bez problemu zaparkowałem.",
         },
-        # 👎 negatywne
+        # negatywne
         {
             "user": users["diana"],
             "parking_point": parking_points["krakow_rynek"],
             "is_like": False,
             "description": "Zawsze zajęte.",
         },
-        # 😐 neutralne
         {
             "user": users["eve"],
             "parking_point": parking_points["krakow_rynek"],
             "is_like": False,
             "description": "Ciężko ocenić, różnie bywa.",
         },
-        # 👍 mieszane
+        # mieszane / pozytywne
         {
             "user": users["alice"],
             "parking_point": parking_points["gdansk_molo"],
@@ -59,7 +58,7 @@ def create_reviews(users, parking_points):
     created = []
 
     for data in reviews_data:
-        review, created_flag = Review.objects.get_or_create(
+        review, _ = Review.objects.get_or_create(
             user=data["user"],
             parking_point=data["parking_point"],
             defaults={

@@ -27,7 +27,7 @@ def user():
 @pytest.fixture
 def parking_point(user):
     return ParkingPoint.objects.create(
-        location={"lat": 52.2297, "lng": 21.0122},
+        original_location={"lat": 52.2297, "lng": 21.0122},
         user=user,
     )
 

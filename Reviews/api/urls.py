@@ -1,8 +1,12 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ReviewAPICreateListView
-
+from django.urls import path
+from .views import (
+    ParkingPointReviewsListCreateAPIView,
+    ReviewUpdateAPIView,
+)
 
 urlpatterns = [
-    path("", ReviewAPICreateListView.as_view(), name="review"),
+    path(
+        "", ParkingPointReviewsListCreateAPIView.as_view(), name="reviews-list-create"
+    ),
+    path("<int:review_id>/", ReviewUpdateAPIView.as_view(), name="review-update"),
 ]

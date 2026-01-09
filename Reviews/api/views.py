@@ -1,56 +1,25 @@
-from rest_framework import permissions, status
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+
+from parking_point.models import ParkingPoint
 from ..models import Review
 from .serializers import ReviewSerializer
-from rest_framework.generics import ListCreateAPIView
-from rest_framework.exceptions import ValidationError
-from django.shortcuts import get_object_or_404
-from parking_point.models import ParkingPoint
 
 
-class ReviewAPICreateListView(ListCreateAPIView):
+# GET → lista recenzji punktu
+# POST → dodanie recenzji
+class ParkingPointReviewsListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_parking_point(self):
-        """
-        Pobiera parking point na podstawie pk z URL.
-        Zwraca None podczas generowania schematu (drf-spectacular),
-        gdzie pk nie jest dostępne.
-        """
-        pk = self.kwargs.get("pk")
-        if pk is None:
-            return None  # dla schema generatora
-        return get_object_or_404(ParkingPoint, pk=pk)
+        return get_object_or_404(ParkingPoint, pk=self.kwargs["pk"])
 
     def get_queryset(self):
-        """
-        GET bez PK → np. podczas generowania OpenAPI → zwracamy queryset pusty,
-        aby uniknąć błędów 404.
-        """
-        pk = self.kwargs.get("pk")
-        if pk is None:
-            return Review.objects.none()  # dla dokumentacji
-
-        return Review.objects.filter(parking_point_id=pk)
-
-    def get_serializer(self, *args, **kwargs):
-        """
-        Wstrzykuje is_like=True dla twórcy parking pointa
-        BEFORE walidacja.
-        """
-        if self.request.method == "POST":
-            parking_point = self.get_parking_point()
-
-            if parking_point and parking_point.user_id == self.request.user.id:
-                data = kwargs.get("data")
-                if isinstance(data, dict):
-                    # Nie zmieniamy request.data! Modyfikujemy kopię.
-                    data = data.copy()
-                    data["is_like"] = True
-                    kwargs["data"] = data
-
-        return super().get_serializer(*args, **kwargs)
+        return Review.objects.filter(
+            parking_point=self.get_parking_point()
+        ).select_related("user")
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -58,19 +27,22 @@ class ReviewAPICreateListView(ListCreateAPIView):
         return context
 
     def perform_create(self, serializer):
-        parking_point = self.get_parking_point()
-        if parking_point is None:
-            raise ValidationError({"error": "Brak obiektu parking point."})
+        # blokada: 1 recenzja na usera
+        if Review.objects.filter(
+            user=self.request.user, parking_point_id=self.kwargs["pk"]
+        ).exists():
+            raise ValidationError("Już dodałeś recenzję dla tego punktu.")
 
-        serializer.save()
+        serializer.save(user=self.request.user, parking_point=self.get_parking_point())
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        obj, created = serializer.upsert(serializer.validated_data)
+# PUT → update po ID
+class ReviewUpdateAPIView(generics.UpdateAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = "review_id"
 
-        return Response(
-            self.get_serializer(obj).data,
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+    def get_queryset(self):
+        return Review.objects.filter(
+            parking_point_id=self.kwargs["pk"], user=self.request.user
         )
