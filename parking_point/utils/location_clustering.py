@@ -64,7 +64,7 @@ def update_parking_point_location(parking_point):
     new_location = median_location_for_cluster(top_cluster)
 
     # 1. zapis nowej lokalizacji
-    parking_point.current_location = new_location
+    parking_point.location = new_location
     parking_point.save(update_fields=["location"])
 
     # 2. RESET zgłoszeń
