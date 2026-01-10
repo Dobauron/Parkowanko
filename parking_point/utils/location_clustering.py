@@ -14,6 +14,7 @@ DEFAULT_CLUSTER_CONFIG = {
     "REQUIRE_ADVANTAGE": True,
 }
 
+
 # ----------------- FUNKCJE -----------------
 def cluster_suggestions_by_distance(suggestions, max_distance):
     clusters = []
