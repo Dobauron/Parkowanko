@@ -15,8 +15,6 @@ DEFAULT_CLUSTER_CONFIG = {
 }
 
 # ----------------- FUNKCJE -----------------
-
-
 def cluster_suggestions_by_distance(suggestions, max_distance):
     clusters = []
     for suggestion in suggestions:
