@@ -23,6 +23,19 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         )
         exclude = ["original_location"]
 
+    def create(self, validated_data):
+        request = self.context.get("request")
+        location = validated_data.get("location")
+
+        parking_point = ParkingPoint.objects.create(
+            user=request.user if request else None,
+            original_location=location,
+            location=location,
+            address=validated_data.get("address"),
+        )
+
+        return parking_point
+
     @extend_schema_field(serializers.DictField)
     def get_user(self, obj):
         return {

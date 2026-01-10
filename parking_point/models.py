@@ -17,7 +17,9 @@ class ParkingPoint(models.Model):
     original_location = models.JSONField(
         verbose_name="original-coordinates", null=False, blank=False
     )
-    location = models.JSONField(verbose_name="current-location", null=True, blank=True)
+    location = models.JSONField(
+        verbose_name="current-location", null=False, blank=False
+    )
     # Metadane czasowe
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Utworzono")
     updated_at = models.DateTimeField(
