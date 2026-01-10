@@ -16,6 +16,7 @@ DEFAULT_CLUSTER_CONFIG = {
 
 # ----------------- FUNKCJE -----------------
 
+
 def cluster_suggestions_by_distance(suggestions, max_distance):
     clusters = []
     for suggestion in suggestions:
@@ -57,7 +58,9 @@ def update_parking_point_location(parking_point):
         )
 
         valid_clusters = [
-            c for c in clusters if len(set(s.user_id for s in c)) >= cfg["MIN_USERS_IN_CLUSTER"]
+            c
+            for c in clusters
+            if len(set(s.user_id for s in c)) >= cfg["MIN_USERS_IN_CLUSTER"]
         ]
 
         if not valid_clusters:
@@ -85,5 +88,5 @@ def update_parking_point_location(parking_point):
             "Cluster approved for ParkingPoint %s, new location: %s, users: %s",
             parking_point.id,
             new_location,
-            [s.user_id for s in top_cluster]
+            [s.user_id for s in top_cluster],
         )

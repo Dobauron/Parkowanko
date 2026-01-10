@@ -179,15 +179,15 @@ SIMPLE_JWT = {
 
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {'class': 'logging.StreamHandler'},
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
     },
-    'loggers': {
-        'parking_point.utils.location_clustering': {
-            'handlers': ['console'],
-            'level': 'INFO',
+    "loggers": {
+        "parking_point.utils.location_clustering": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
     },
 }
