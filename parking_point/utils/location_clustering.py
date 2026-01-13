@@ -1,23 +1,44 @@
 import numpy as np
 import logging
+
 from django.conf import settings
 from django.db import transaction
+
 from parking_point_edit_location.models import ParkingPointEditLocation
-from parking_point.api.validators import haversine  # Twoja funkcja z validators.py
+from parking_point.api.validators import haversine
+
 
 logger = logging.getLogger(__name__)
 
-# --- KONFIGURACJA DOMYŚLNA ---
+
+# ============================================================
+#  KONFIGURACJA (możliwa do nadpisania w settings.py)
+# ============================================================
+
 DEFAULT_CLUSTER_CONFIG = {
-    "MIN_USERS_IN_CLUSTER": 3,
-    "CLUSTER_RADIUS_METERS": 25,
-    "REQUIRE_ADVANTAGE": True,
+    "MIN_USERS_IN_CLUSTER": 3,  # minimalna liczba unikalnych userów w klastrze
+    "CLUSTER_RADIUS_METERS": 25,  # promień klastra
+    "REQUIRE_ADVANTAGE": True,  # czy wymagamy przewagi nad drugim klastrem
 }
 
 
-# ----------------- FUNKCJE -----------------
+def get_cluster_config():
+    return getattr(settings, "PARKING_POINT_CLUSTERING", DEFAULT_CLUSTER_CONFIG)
+
+
+# ============================================================
+#  KLASTERYZACJA
+# ============================================================
+
+
 def cluster_suggestions_by_distance(suggestions, max_distance):
+    """
+    Grupuje zgłoszenia w klastry na podstawie odległości (haversine).
+    Każde zgłoszenie trafia do pierwszego klastra,
+    w którym znajdzie punkt w promieniu max_distance.
+    """
     clusters = []
+
     for suggestion in suggestions:
         placed = False
         lat1, lng1 = suggestion.location["lat"], suggestion.location["lng"]
@@ -31,29 +52,56 @@ def cluster_suggestions_by_distance(suggestions, max_distance):
                     break
             if placed:
                 break
+
         if not placed:
             clusters.append([suggestion])
+
     return clusters
 
 
 def median_location_for_cluster(cluster):
+    """
+    Liczy medianę współrzędnych dla klastra.
+    """
     lats = [s.location["lat"] for s in cluster]
     lngs = [s.location["lng"] for s in cluster]
-    return {"lat": float(np.median(lats)), "lng": float(np.median(lngs))}
+
+    return {
+        "lat": float(np.median(lats)),
+        "lng": float(np.median(lngs)),
+    }
+
+
+# ============================================================
+#  GŁÓWNA FUNKCJA BIZNESOWA
+# ============================================================
 
 
 def update_parking_point_location(parking_point):
-    cfg = getattr(settings, "PARKING_POINT_CLUSTERING", DEFAULT_CLUSTER_CONFIG)
+    """
+    Główna logika zatwierdzania klastra.
+
+    Warunki:
+    - musi istnieć klaster z min. liczbą unikalnych userów
+    - opcjonalnie: musi mieć przewagę nad drugim klastrem
+
+    Efekt:
+    - location ParkingPoint = mediana klastra
+    - wszystkie edit_location dla tego PP są usuwane
+    """
+
+    cfg = get_cluster_config()
 
     with transaction.atomic():
-        # blokada wierszy, aby uniknąć race condition
+        # blokada wierszy – ochrona przed race condition
         suggestions = list(parking_point.location_edits.select_for_update())
 
         if len(suggestions) < cfg["MIN_USERS_IN_CLUSTER"]:
-            return  # za mało zgłoszeń w ogóle
+            return
 
         clusters = cluster_suggestions_by_distance(
-            suggestions, max_distance=cfg["CLUSTER_RADIUS_METERS"]
+            suggestions,
+            max_distance=cfg["CLUSTER_RADIUS_METERS"],
         )
 
         valid_clusters = [
@@ -63,28 +111,29 @@ def update_parking_point_location(parking_point):
         ]
 
         if not valid_clusters:
-            return  # brak klastra z minimalną liczbą userów
+            return
 
         valid_clusters.sort(key=len, reverse=True)
 
-        # opcjonalnie: sprawdzanie remisu
+        # jeżeli wymagamy przewagi – blokujemy remis
         if cfg["REQUIRE_ADVANTAGE"] and len(valid_clusters) > 1:
             if len(valid_clusters[0]) == len(valid_clusters[1]):
-                return  # remis → brak przesunięcia
+                return
 
         top_cluster = valid_clusters[0]
         new_location = median_location_for_cluster(top_cluster)
 
-        # zapis mediany do pola location
+        # zapis nowej lokalizacji
         parking_point.location = new_location
         parking_point.save(update_fields=["location"])
 
-        # usunięcie wszystkich editów po zatwierdzeniu
-        ParkingPointEditLocation.objects.filter(parking_point=parking_point).delete()
+        # usunięcie editów z klastra po zatwierdzeniu
+        ParkingPointEditLocation.objects.filter(
+            id__in=[s.id for s in top_cluster]
+        ).delete()
 
-        # logowanie do monitoringu
         logger.info(
-            "Cluster approved for ParkingPoint %s, new location: %s, users: %s",
+            "Cluster approved | PP=%s | location=%s | users=%s",
             parking_point.id,
             new_location,
             [s.user_id for s in top_cluster],
