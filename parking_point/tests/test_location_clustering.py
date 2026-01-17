@@ -5,6 +5,7 @@ from parking_point_edit_location.models import ParkingPointEditLocation
 from parking_point.utils.location_clustering import update_parking_point_location
 from parking_point.utils.location_clustering import DEFAULT_CLUSTER_CONFIG
 from pytest import approx
+
 User = get_user_model()
 
 
@@ -61,7 +62,7 @@ class TestParkingPointLocationConsensus:
     # ------------------------------------------------------------
     def test_cluster_updates_location_and_deletes_edits(self, parking, users):
         # Tworzymy klaster minimalny
-        cluster_users = users[:DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]]
+        cluster_users = users[: DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]]
         for i, user in enumerate(cluster_users):
             ParkingPointEditLocation.objects.create(
                 user=user,
@@ -115,7 +116,10 @@ class TestParkingPointLocationConsensus:
                 location={"lat": 52.2300 + i * 0.00001, "lng": 21.0130 + i * 0.00001},
             )
         # Klaster 2 (założony w tym samym PP, ale nie spełnia już progów bo pierwszy klaster zostanie zatwierdzony)
-        for i in range(DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"], 2 * DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]):
+        for i in range(
+            DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"],
+            2 * DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"],
+        ):
             ParkingPointEditLocation.objects.create(
                 user=users[i % len(users)],
                 parking_point=parking,
@@ -133,14 +137,16 @@ class TestParkingPointLocationConsensus:
 
         # 2. Wszystkie edit pointy pierwszego klastra usunięte, pozostają tylko edycje drugiego (jeśli nie należały do zatwierdzonego)
         edits_remaining = ParkingPointEditLocation.objects.filter(parking_point=parking)
-        assert edits_remaining.count() == DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]  # drugi klaster nie został zatwierdzony
+        assert (
+            edits_remaining.count() == DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]
+        )  # drugi klaster nie został zatwierdzony
 
     # ------------------------------------------------------------
     # Test 6: zatwierdzony klaster usuwa tylko swoje edit pointy, reszta zostaje
     # ------------------------------------------------------------
     def test_only_cluster_edits_deleted(self, parking, users):
         # Tworzymy klaster, który zostanie zatwierdzony
-        cluster_users = users[:DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]]
+        cluster_users = users[: DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]]
         for i, user in enumerate(cluster_users):
             ParkingPointEditLocation.objects.create(
                 user=user,
@@ -149,7 +155,7 @@ class TestParkingPointLocationConsensus:
             )
 
         # Dodajemy kilka innych edit pointów, które nie należą do zatwierdzonego klastra
-        other_users = users[DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]:]
+        other_users = users[DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"] :]
         for i, user in enumerate(other_users):
             ParkingPointEditLocation.objects.create(
                 user=user,
@@ -166,7 +172,9 @@ class TestParkingPointLocationConsensus:
         remaining_user_ids = set(edit.user_id for edit in remaining_edits)
 
         # 1. żaden użytkownik z zatwierdzonego klastra nie powinien zostać
-        assert not any(uid in remaining_user_ids for uid in [u.id for u in cluster_users])
+        assert not any(
+            uid in remaining_user_ids for uid in [u.id for u in cluster_users]
+        )
 
         # 2. pozostałe edit pointy powinny zostać
         assert all(uid in remaining_user_ids for uid in [u.id for u in other_users])
