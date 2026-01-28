@@ -18,7 +18,7 @@ def create_edit_locations(users, parking_points):
 
     edit_locations_data = [
         # ----------------------------
-        # WARSZAWA – KLASTER WAŻNY (3)
+        # WARSZAWA – KLASTER
         # ----------------------------
         {
             "key": "wawa_c1_u1",
@@ -31,12 +31,6 @@ def create_edit_locations(users, parking_points):
             "user": users["bob"],
             "parking_point": parking_points["warszawa_centrum"],
             "location": {"lat": 52.23051, "lng": 21.01151},
-        },
-        {
-            "key": "wawa_c1_u3",
-            "user": users["charlie"],
-            "parking_point": parking_points["warszawa_centrum"],
-            "location": {"lat": 52.23052, "lng": 21.01152},
         },
         # ---------------------------------
         # WARSZAWA – KLASTER ZA MAŁY (2)

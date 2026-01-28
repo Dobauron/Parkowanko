@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from ..models import ParkingPoint
 from .serializers import ParkingPointSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from Reviews.models import Review
 from Reviews.api.serializers import ReviewSerializer
 from rest_framework.decorators import action
@@ -22,7 +22,7 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
 
     queryset = ParkingPoint.objects.all()
     serializer_class = ParkingPointSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post"]
 
     # Walidacja create wykonywana jest w serializerze!!!

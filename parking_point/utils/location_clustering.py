@@ -128,13 +128,11 @@ def update_parking_point_location(parking_point):
         parking_point.save(update_fields=["location"])
 
         # usunięcie editów z klastra po zatwierdzeniu
-        ParkingPointEditLocation.objects.filter(
-            id__in=[s.id for s in top_cluster]
-        ).delete()
+        deleted_count = parking_point.location_edits.all().delete()
 
         logger.info(
-            "Cluster approved | PP=%s | location=%s | users=%s",
+            "Cluster approved | PP=%s | location=%s | Removed edits: %s",
             parking_point.id,
             new_location,
-            [s.user_id for s in top_cluster],
+            deleted_count
         )
