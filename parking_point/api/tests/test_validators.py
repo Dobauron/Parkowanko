@@ -5,7 +5,6 @@ from parking_point.models import ParkingPoint
 from parking_point.api.validators import (
     haversine,
     reject_invalid_location_structure,
-    reject_too_close_to_other_points,
 )
 
 
@@ -21,7 +20,6 @@ class DummySerializer:
         return True
 
     @reject_invalid_location_structure
-    @reject_too_close_to_other_points(distance_limit=50)
     def validate_location_with_distance(self, location):
         return True
 

@@ -47,7 +47,7 @@ def create_parking_points(users):
 
     for data in parking_points_data:
         pp, _ = ParkingPoint.objects.get_or_create(
-            original_location=data["location"],
+            address=data["address"],
             defaults={
                 "user": data["user"],
                 "address": data["address"],

@@ -40,6 +40,9 @@ class ParkingPoint(models.Model):
         update_parking_point_location(self)
 
     def save(self, *args, **kwargs):
-        if not self.pk and self.location is None:
-            self.location = self.original_location
+        # Logika inicjalizacji (pamiętaj, że original_location musi być w modelu)
+        if not self.pk:
+            if self.location and not getattr(self, 'original_location', None):
+                self.original_location = self.location
+
         super().save(*args, **kwargs)
