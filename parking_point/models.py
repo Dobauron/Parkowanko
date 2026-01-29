@@ -28,6 +28,7 @@ class ParkingPoint(models.Model):
     address = models.CharField(
         max_length=255, verbose_name="Address", null=True, blank=True
     )
+    marked_for_deletion_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return str(self.address)
@@ -42,7 +43,7 @@ class ParkingPoint(models.Model):
     def save(self, *args, **kwargs):
         # Logika inicjalizacji (pamiętaj, że original_location musi być w modelu)
         if not self.pk:
-            if self.location and not getattr(self, 'original_location', None):
+            if self.location and not getattr(self, "original_location", None):
                 self.original_location = self.location
 
         super().save(*args, **kwargs)

@@ -11,7 +11,8 @@ from parking_point_edit_location.models import ParkingPointEditLocation
 from parking_point_edit_location.api.serializers import (
     ParkingPointEditLocationSerializer,
 )
-
+from django.utils import timezone
+from datetime import timedelta
 from django.db.models import Count, Q
 
 
@@ -31,10 +32,15 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
         serializer.save(user=user)
 
     def get_queryset(self):
+        cutoff_date = timezone.now() - timedelta(days=30)
         return ParkingPoint.objects.annotate(
             like_count=Count("reviews", filter=Q(reviews__is_like=True)),
-            dislike_count=Count(
-                "reviews",
-                filter=Q(reviews__is_like=False),
-            ),
-        )
+            dislike_count=Count("reviews", filter=Q(reviews__is_like=False)),
+            ).filter(
+                # LOGIKA WIDOCZNOŚCI:
+                # Pokaż jeśli:
+                # NIE jest oznaczony do usunięcia (stoper nie ruszył)
+                # LUB stoper ruszył, ale było to mniej niż 30 dni temu
+                Q(marked_for_deletion_at__isnull=True)
+                | Q(marked_for_deletion_at__gt=cutoff_date)
+            )

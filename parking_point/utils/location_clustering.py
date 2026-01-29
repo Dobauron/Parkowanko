@@ -134,5 +134,5 @@ def update_parking_point_location(parking_point):
             "Cluster approved | PP=%s | location=%s | Removed edits: %s",
             parking_point.id,
             new_location,
-            deleted_count
+            deleted_count,
         )
