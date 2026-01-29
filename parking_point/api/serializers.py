@@ -20,7 +20,7 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "user",
             "like_count",
             "dislike_count",
-            "address"
+            "address",
         )
         exclude = ["original_location"]
 

@@ -54,7 +54,18 @@ def create_reviews(users, parking_points):
             "description": "Blisko morza, super miejscówka.",
         },
     ]
+    # --- SEKCJA TESTOWA: WROCŁAW DOSTAJE 5 DISLAJKÓW ---
+    # Używamy pętli, żeby nie pisać 5 razy tego samego
+    wroclaw = parking_points["wroclaw_rynek"]
+    test_users = ["alice", "bob", "charlie", "diana", "eve"]
 
+    for username in test_users:
+        reviews_data.append({
+            "user": users[username],
+            "parking_point": wroclaw,
+            "is_like": False,
+            "description": "To miejsce nie istnieje lub jest niedostępne!",
+        })
     created = []
 
     for data in reviews_data:
