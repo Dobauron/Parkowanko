@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "Ranks",
     "parking_point_edit_location",
     "rest_framework_simplejwt.token_blacklist",
+    "django_rest_passwordreset",
 ]
 
 MIDDLEWARE = [
@@ -191,3 +192,17 @@ LOGGING = {
         },
     },
 }
+
+# Email Settings
+if DEBUG:
+    # Lokalnie: maile lądują w terminalu
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    # Produkcja (np. Render + Brevo/Gmail): maile lecą w świat
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = config("EMAIL_HOST", default='smtp.gmail.com')
+    EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+    DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
