@@ -21,7 +21,7 @@ class ParkingPointSerializer(serializers.ModelSerializer):
             "like_count",
             "dislike_count",
         )
-        exclude = ["original_location","marked_for_deletion_at"]
+        exclude = ["original_location", "marked_for_deletion_at"]
 
     def create(self, validated_data):
         request = self.context.get("request")

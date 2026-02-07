@@ -14,7 +14,9 @@ class ResetDatabaseMockDataView(APIView):
     # Dodanie tej linii uciszy błąd o "unable to guess serializer"
     serializer_class = None
 
-    @extend_schema(responses={200: None}, description="Resetuje całą bazę i wgrywa mocki.")
+    @extend_schema(
+        responses={200: None}, description="Resetuje całą bazę i wgrywa mocki."
+    )
     def post(self, request):
         # Na Renderze settings.DEBUG może być False!
         # Upewnij się, że masz to ustawione w zmiennych środowiskowych Rendera.
@@ -30,7 +32,9 @@ class ResetDatabaseMockDataView(APIView):
                     # Render korzysta z Postgresa, więc to zadziała
                     cursor.execute("DROP SCHEMA public CASCADE;")
                     cursor.execute("CREATE SCHEMA public;")
-                    cursor.execute("GRANT ALL ON SCHEMA public TO public;")  # Czasem wymagane uprawnienia
+                    cursor.execute(
+                        "GRANT ALL ON SCHEMA public TO public;"
+                    )  # Czasem wymagane uprawnienia
 
                 # Odpalamy migracje na świeżym schemacie
                 call_command("migrate", interactive=False)
@@ -52,5 +56,5 @@ class ResetDatabaseMockDataView(APIView):
             # Warto wiedzieć, co dokładnie wybuchło
             return Response(
                 {"status": "error", "message": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
