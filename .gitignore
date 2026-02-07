@@ -8,3 +8,20 @@ __pycache__/
 venv/
 .env
 staticfiles/
+
+# --- Logi i pliki tymczasowe ---
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+
+# --- Pliki danych (JSON) ---
+PP.json
+darmowe_parkingi_final.json
+*.json
+
+# --- Skrypty importowe i eksportowe (Management Commands) ---
+# Jeśli chcesz je zachować tylko u siebie lokalnie:
+parking_point/management/
+parking_point/services.py

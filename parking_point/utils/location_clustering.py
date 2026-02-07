@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import transaction
 
 from parking_point_edit_location.models import ParkingPointEditLocation
-from parking_point.api.validators import haversine
+from .geo_utils import haversine
 
 
 logger = logging.getLogger(__name__)

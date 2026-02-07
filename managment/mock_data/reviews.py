@@ -29,7 +29,10 @@ def create_reviews(users, parking_points):
             "parking_point": parking_points["krakow_rynek"],
             "is_like": False,
             "occupancy": Review.Occupancy.MEDIUM,
-            "attributes": [Review.Attributes.POOR_SURFACE, Review.Attributes.HARD_ACCESS],
+            "attributes": [
+                Review.Attributes.POOR_SURFACE,
+                Review.Attributes.HARD_ACCESS,
+            ],
             "description": "Dziury jak po bombardowaniu, nie polecam niskim autom.",
         },
         # GDAŃSK - Pozytyw, ale podtapia
@@ -38,7 +41,10 @@ def create_reviews(users, parking_points):
             "parking_point": parking_points["gdansk_molo"],
             "is_like": True,
             "occupancy": Review.Occupancy.LOW,
-            "attributes": [Review.Attributes.FLOOD_PRONE, Review.Attributes.FREE_OFF_SEASON],
+            "attributes": [
+                Review.Attributes.FLOOD_PRONE,
+                Review.Attributes.FREE_OFF_SEASON,
+            ],
             "description": "Super poza sezonem, ale przy deszczu stoi woda.",
         },
         # POZNAŃ - Bezpieczeństwo
@@ -49,7 +55,7 @@ def create_reviews(users, parking_points):
             "occupancy": Review.Occupancy.HIGH,
             "attributes": [Review.Attributes.DANGEROUS_AREA],
             "description": "Strach zostawić auto po zmroku.",
-        }
+        },
     ]
 
     # TEST SCENARIO: WROCŁAW (Punkt widmo / Do usunięcia)
@@ -58,14 +64,16 @@ def create_reviews(users, parking_points):
     test_usernames = ["alice", "bob", "charlie", "diana", "eve"]
 
     for username in test_usernames:
-        reviews_data.append({
-            "user": users[username],
-            "parking_point": wroclaw,
-            "is_like": False,
-            "occupancy": Review.Occupancy.NO_DATA,
-            "attributes": [Review.Attributes.HARD_ACCESS],
-            "description": "To miejsce jest zagrodzone słupkami!",
-        })
+        reviews_data.append(
+            {
+                "user": users[username],
+                "parking_point": wroclaw,
+                "is_like": False,
+                "occupancy": Review.Occupancy.NO_DATA,
+                "attributes": [Review.Attributes.HARD_ACCESS],
+                "description": "To miejsce jest zagrodzone słupkami!",
+            }
+        )
 
     created = []
     for data in reviews_data:

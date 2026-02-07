@@ -36,11 +36,11 @@ class ParkingPointViewSet(viewsets.ModelViewSet):
         return ParkingPoint.objects.annotate(
             like_count=Count("reviews", filter=Q(reviews__is_like=True)),
             dislike_count=Count("reviews", filter=Q(reviews__is_like=False)),
-            ).filter(
-                # LOGIKA WIDOCZNOŚCI:
-                # Pokaż jeśli:
-                # NIE jest oznaczony do usunięcia (stoper nie ruszył)
-                # LUB stoper ruszył, ale było to mniej niż 30 dni temu
-                Q(marked_for_deletion_at__isnull=True)
-                | Q(marked_for_deletion_at__gt=cutoff_date)
-            )
+        ).filter(
+            # LOGIKA WIDOCZNOŚCI:
+            # Pokaż jeśli:
+            # NIE jest oznaczony do usunięcia (stoper nie ruszył)
+            # LUB stoper ruszył, ale było to mniej niż 30 dni temu
+            Q(marked_for_deletion_at__isnull=True)
+            | Q(marked_for_deletion_at__gt=cutoff_date)
+        )
