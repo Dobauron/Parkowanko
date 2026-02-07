@@ -1,4 +1,4 @@
-from parking_point.api.validators import haversine
+from parking_point.utils.geo_utils import haversine
 from parking_point_edit_location.models import ParkingPointEditLocation
 
 CLEANUP_RADIUS_METERS = 25
