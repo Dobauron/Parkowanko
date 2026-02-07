@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
 from django.shortcuts import get_object_or_404
 from parking_point.models import ParkingPoint
-from ..models import ParkingPointEditLocation
 from .serializers import ParkingPointEditLocationSerializer
 
 

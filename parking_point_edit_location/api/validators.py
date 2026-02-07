@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from parking_point.api.validators import haversine
+from parking_point.utils.geo_utils import haversine
 
 
 def get_distance_between_locations(new_loc, current_loc):

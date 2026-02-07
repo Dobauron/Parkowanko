@@ -38,9 +38,16 @@ class ParkingPointSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.DictField)
     def get_user(self, obj):
+        # Sprawdzamy, czy parking ma przypisanego użytkownika
+        if obj.user:
+            return {
+                "id": obj.user.id,
+                "username": obj.user.username,
+            }
+        # Jeśli nie ma użytkownika (np. po imporcie), zwracamy info o systemie lub None
         return {
-            "id": obj.user_id,
-            "username": obj.user.username,
+            "id": None,
+            "username": "System/Import",
         }
 
     @extend_schema_field(serializers.IntegerField)
