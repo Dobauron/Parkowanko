@@ -25,26 +25,22 @@ class TestRegisterView:
         user = get_user_model().objects.get(email=data["email"])
         assert user.check_password(data["password"])
 
-    @pytest.mark.django_db
-    class TestRegisterView:
-        client = APIClient()
+    def test_register_user_invalid_data(self):
+        data = {
+            "email": "invalidemail",  # Niepoprawny adres email
+            "username": "",  # Pusty username
+            "password": "short",  # Zbyt krótkie hasło
+        }
 
-        def test_register_user_invalid_data(self):
-            data = {
-                "email": "invalidemail",  # Niepoprawny adres email
-                "username": "",  # Pusty username
-                "password": "short",  # Zbyt krótkie hasło
-            }
+        response = self.client.post(
+            "/api/auth/register/", data, format="json"
+        )  # Dodaj pełną ścieżkę URL
+        assert response.status_code == 400  # Oczekujemy błędu 400 (bad request)
 
-            response = self.client.post(
-                "/api/auth/register/", data, format="json"
-            )  # Dodaj pełną ścieżkę URL
-            assert response.status_code == 400  # Oczekujemy błędu 400 (bad request)
-
-            # Sprawdź, czy odpowiedź zawiera błędy dla 'email' i 'username'
-            assert "email" in response.data
-            assert "username" in response.data
-            assert "password" in response.data
+        # Sprawdź, czy odpowiedź zawiera błędy dla 'email' i 'username'
+        assert "email" in response.data
+        assert "username" in response.data
+        assert "password" in response.data
 
 
 @pytest.mark.django_db

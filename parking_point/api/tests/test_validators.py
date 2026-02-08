@@ -2,10 +2,8 @@ import pytest
 from rest_framework.exceptions import ValidationError
 
 from parking_point.models import ParkingPoint
-from parking_point.api.validators import (
-    haversine,
-    reject_invalid_location_structure,
-)
+from parking_point.api.validators import reject_invalid_location_structure
+from parking_point.utils.geo_utils import haversine
 
 
 # ---------------------------------------------------------

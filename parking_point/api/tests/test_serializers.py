@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 
 from parking_point.api.serializers import ParkingPointSerializer
 from parking_point.models import ParkingPoint
-
 User = get_user_model()
 
 
