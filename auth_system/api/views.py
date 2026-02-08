@@ -16,7 +16,9 @@ from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
 from auth_system.services.auth import build_jwt_payload
 from rest_framework_simplejwt.views import TokenRefreshView
-
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -68,49 +70,10 @@ class ChangePasswordView(APIView):
 User = get_user_model()
 
 
-class GoogleLoginView(APIView):
-    def post(self, request):
-        """
-        Logowanie użytkownika za pomocą tokena Google OAuth2 i zwracanie JWT.
-        """
-        token = request.data.get("token")
-
-        if not token:
-            return Response(
-                {"error": "Brak tokena"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Weryfikacja tokena Google
-        google_url = f"https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={token}"
-        google_response = requests.get(google_url)
-
-        if google_response.status_code != 200:
-            return Response(
-                {"error": "Nieprawidłowy token"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        google_data = loads(google_response.text)
-        email = google_data.get("email")
-
-        if not email:
-            return Response(
-                {"error": "Brak emaila w odpowiedzi Google"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Sprawdzenie, czy użytkownik istnieje
-        user, created = User.objects.get_or_create(
-            email=email, defaults={"username": email}
-        )
-
-        # Generowanie tokena JWT
-        refresh = RefreshToken.for_user(user)
-        return Response(
-            {
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            }
-        )
+class GoogleLoginView(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = "http://127.0.0.1:8000/api/auth/social/google/login/callback/"
+    client_class = OAuth2Client
 
 
 class CustomTokenRefreshView(TokenRefreshView):
