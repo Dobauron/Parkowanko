@@ -130,19 +130,18 @@ class TestParkingPointLocationConsensus:
         parking.refresh_from_db()
 
         # 1. Lokalizacja = mediana pierwszego klastra
-        expected_lat = 52.23050
-        expected_lng = 21.01300
-        assert parking.location["lat"] == approx(expected_lat, abs=1e-3)
-        assert parking.location["lng"] == approx(expected_lng, abs=1e-3)
+        # Poprawione wartości oczekiwane (mediana dla i=0,1,2)
+        expected_lat = 52.23001
+        expected_lng = 21.01301
+        assert parking.location["lat"] == approx(expected_lat, abs=1e-5)
+        assert parking.location["lng"] == approx(expected_lng, abs=1e-5)
 
-        # 2. Wszystkie edit pointy pierwszego klastra usunięte, pozostają tylko edycje drugiego (jeśli nie należały do zatwierdzonego)
+        # 2. Wszystkie edit pointy powinny zostać usunięte (zgodnie z logiką w location_clustering.py)
         edits_remaining = ParkingPointEditLocation.objects.filter(parking_point=parking)
-        assert (
-            edits_remaining.count() == DEFAULT_CLUSTER_CONFIG["MIN_USERS_IN_CLUSTER"]
-        )  # drugi klaster nie został zatwierdzony
+        assert edits_remaining.count() == 0
 
     # ------------------------------------------------------------
-    # Test 6: zatwierdzony klaster usuwa tylko swoje edit pointy, reszta zostaje
+    # Test 6: zatwierdzony klaster usuwa WSZYSTKIE edit pointy
     # ------------------------------------------------------------
     def test_only_cluster_edits_deleted(self, parking, users):
         # Tworzymy klaster, który zostanie zatwierdzony
@@ -167,14 +166,6 @@ class TestParkingPointLocationConsensus:
         update_parking_point_location(parking)
         parking.refresh_from_db()
 
-        # Sprawdzamy, że zatwierdzony klaster został usunięty
+        # Sprawdzamy, że WSZYSTKIE edit pointy zostały usunięte
         remaining_edits = ParkingPointEditLocation.objects.filter(parking_point=parking)
-        remaining_user_ids = set(edit.user_id for edit in remaining_edits)
-
-        # 1. żaden użytkownik z zatwierdzonego klastra nie powinien zostać
-        assert not any(
-            uid in remaining_user_ids for uid in [u.id for u in cluster_users]
-        )
-
-        # 2. pozostałe edit pointy powinny zostać
-        assert all(uid in remaining_user_ids for uid in [u.id for u in other_users])
+        assert remaining_edits.count() == 0

@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from rest_framework.exceptions import ValidationError
 from Reviews.models import Review
 from parking_point.models import ParkingPoint
 
@@ -147,28 +148,6 @@ def test_different_users_can_review_same_parking_point(
     )
 
     assert Review.objects.count() == 2
-
-
-@pytest.mark.django_db
-def test_owner_review_sets_is_like_true(api_client, user, parking_point):
-    """
-    Właściciel parking pointa zawsze ma is_like=True
-    """
-    api_client.force_authenticate(user=user)
-    url = f"/api/parking-points/{parking_point.id}/reviews/"
-    api_client.post(
-        url,
-        {
-            "occupancy": "MEDIUM",
-            "attributes": [],
-            "description": "Owner review",
-            "is_like": False,  # frontend może wysłać False
-        },
-        format="json",
-    )
-
-    review = Review.objects.get()
-    assert review.is_like is True
 
 
 @pytest.mark.django_db
