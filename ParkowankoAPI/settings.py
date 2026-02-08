@@ -135,7 +135,10 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # ------------------------------------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:4200", "https://parkowanko.onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:4200", "https://parkowanko.onrender.com", "https://zygarios.github.io"]
+CORS_ALLOWED_ORIGINS = [
+    "https://zygarios.github.io",
+]
 CORS_ALLOW_HEADERS = [
     "authorization",
     "content-type",
