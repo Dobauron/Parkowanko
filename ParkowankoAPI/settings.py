@@ -201,11 +201,13 @@ LOGGING = {
 # ------------------------------------------------------------------------------
 # EMAIL SETTINGS (Anymail / Brevo)
 # ------------------------------------------------------------------------------
+# Domyślny nadawca zawsze ustawiony (ważne dla Brevo!)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
     EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
-    DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@parkowanko.com")
 
 ANYMAIL = {
     "SENDINBLUE_API_KEY": config("BREVO_API_KEY", default=""),
