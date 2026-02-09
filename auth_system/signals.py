@@ -25,7 +25,7 @@ def password_reset_token_created(
     send_mail(
         "Reset hasła w aplikacji Parkowanko",
         email_plaintext_message,
-        None,
+        settings.EMAIL_HOST_USER,
         [reset_password_token.user.email],
         fail_silently=False,
     )
