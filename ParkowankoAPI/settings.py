@@ -262,3 +262,8 @@ LOGIN_REDIRECT_URL = "/api/parking-points/"
 
 # Po wylogowaniu, wyrzuć go na Twój endpoint logowania:
 LOGOUT_REDIRECT_URL = "/api/auth/login/"
+
+# ------------------------------------------------------------------------------
+# ALLAUTH ADAPTER
+# ------------------------------------------------------------------------------
+SOCIALACCOUNT_ADAPTER = "auth_system.adapter.CustomSocialAccountAdapter"
