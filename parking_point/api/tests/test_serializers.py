@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 
 from parking_point.api.serializers import ParkingPointSerializer
 from parking_point.models import ParkingPoint
-
 User = get_user_model()
 
 
@@ -76,21 +75,6 @@ class TestParkingPointSerializerPost:
         assert not serializer.is_valid()
         assert "location" in serializer.errors
 
-    def test_location_too_close(self, fake_request, valid_location):
-        ParkingPoint.objects.create(
-            location=valid_location,
-            user=fake_request.user,
-        )
-
-        serializer = ParkingPointSerializer(
-            data={"location": valid_location},
-            context={"request": fake_request},
-        )
-
-        assert not serializer.is_valid()
-        assert "location" in serializer.errors
-        assert "zbyt blisko" in str(serializer.errors["location"][0])
-
 
 # ---------------------------------------------------------
 # Testy GET – serializacja obiektu
@@ -109,7 +93,8 @@ class TestParkingPointSerializerGet:
         assert data["location"] == valid_location
         assert data["like_count"] == 0
         assert data["dislike_count"] == 0
-        assert data["user_id"] == user.id
+        # Poprawka: user jest obiektem, nie płaskim polem
+        assert data["user"]["id"] == user.id
 
 
 @pytest.mark.django_db

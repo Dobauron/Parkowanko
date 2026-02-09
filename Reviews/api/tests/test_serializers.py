@@ -66,12 +66,12 @@ def test_serializer_creates_review(api_request, parking_point, user):
         data=data,
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
     assert serializer.is_valid(), serializer.errors
-    review = serializer.save()
+    # Przekazujemy parking_point w save(), tak jak robi to widok
+    review = serializer.save(parking_point=parking_point, user=user)
 
     assert Review.objects.count() == 1
     assert review.user == user
@@ -84,7 +84,8 @@ def test_serializer_updates_existing_review(api_request, parking_point, user):
     """
     Drugi save() nadpisuje istniejące review (UPSERT)
     """
-    Review.objects.create(
+    # Tworzymy istniejącą recenzję
+    review_instance = Review.objects.create(
         user=user,
         parking_point=parking_point,
         occupancy="LOW",
@@ -98,11 +99,12 @@ def test_serializer_updates_existing_review(api_request, parking_point, user):
         "is_like": True,
     }
 
+    # Przy aktualizacji przekazujemy instancję
     serializer = ReviewSerializer(
+        instance=review_instance,
         data=data,
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
@@ -124,7 +126,6 @@ def test_serializer_requires_occupancy(api_request, parking_point):
         data={"description": "Brak occupancy"},
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
@@ -144,7 +145,6 @@ def test_serializer_rejects_invalid_occupancy(api_request, parking_point):
         },
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
@@ -153,7 +153,7 @@ def test_serializer_rejects_invalid_occupancy(api_request, parking_point):
 
 
 @pytest.mark.django_db
-def test_serializer_allows_empty_attributes(api_request, parking_point):
+def test_serializer_allows_empty_attributes(api_request, parking_point, user):
     """
     attributes mogą być puste
     """
@@ -165,18 +165,17 @@ def test_serializer_allows_empty_attributes(api_request, parking_point):
         },
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
     assert serializer.is_valid(), serializer.errors
-    review = serializer.save()
+    review = serializer.save(parking_point=parking_point, user=user)
 
     assert review.attributes == []
 
 
 @pytest.mark.django_db
-def test_serializer_sets_default_attributes_list(api_request, parking_point):
+def test_serializer_sets_default_attributes_list(api_request, parking_point, user):
     """
     attributes domyślnie = []
     """
@@ -187,22 +186,20 @@ def test_serializer_sets_default_attributes_list(api_request, parking_point):
         },
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
     assert serializer.is_valid(), serializer.errors
-    review = serializer.save()
+    review = serializer.save(parking_point=parking_point, user=user)
 
     assert review.attributes == []
 
 
 @pytest.mark.django_db
-def test_serializer_user_is_read_only(api_request, parking_point):
+def test_serializer_user_is_read_only(api_request, parking_point, user):
     """
     user nie może być nadpisany w payloadzie
     """
-    user = api_request.user
     other_user = User.objects.create_user(
         username="hacker",
         password="password123",
@@ -217,18 +214,18 @@ def test_serializer_user_is_read_only(api_request, parking_point):
         },
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
     assert serializer.is_valid(), serializer.errors
-    review = serializer.save()
+    # Ignorujemy user z payloadu, używamy tego z save() (czyli z requestu w widoku)
+    review = serializer.save(parking_point=parking_point, user=user)
 
     assert review.user == user
 
 
 @pytest.mark.django_db
-def test_serializer_output_contains_user_data(api_request, parking_point):
+def test_serializer_output_contains_user_data(api_request, parking_point, user):
     """
     get_user() zwraca id i username
     """
@@ -239,12 +236,11 @@ def test_serializer_output_contains_user_data(api_request, parking_point):
         },
         context={
             "request": api_request,
-            "parking_point": parking_point,
         },
     )
 
     serializer.is_valid(raise_exception=True)
-    review = serializer.save()
+    review = serializer.save(parking_point=parking_point, user=user)
 
     output = ReviewSerializer(review).data
     assert output["user"]["id"] == api_request.user.id

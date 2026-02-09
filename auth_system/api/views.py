@@ -17,6 +17,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from auth_system.services.auth import build_jwt_payload
 from rest_framework_simplejwt.views import TokenRefreshView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
@@ -74,6 +75,12 @@ class GoogleLoginView(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     callback_url = "http://127.0.0.1:8000/api/auth/social/google/login/callback/"
     client_class = OAuth2Client
+
+class FacebookLoginView(SocialLoginView):
+    adapter_class = FacebookOAuth2Adapter
+    client_class = OAuth2Client
+    # callback_url zależy od konfiguracji frontendu, ale często jest wymagany
+    # callback_url = "http://localhost:4200/auth/facebook/callback"
 
 
 class CustomTokenRefreshView(TokenRefreshView):

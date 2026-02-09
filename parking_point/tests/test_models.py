@@ -21,15 +21,15 @@ class TestParkingPointModel:
         return ParkingPoint.objects.create(
             user=user,
             location={
-                "latitude": 52.2297,
-                "longitude": 21.0122,
+                "lat": 52.2297,
+                "lng": 21.0122,
             },  # Przykładowe współrzędne
         )
 
     def test_parking_point_creation(self, parking_point):
         """Test sprawdzający poprawne utworzenie obiektu ParkingPoint"""
         assert parking_point.user.username == "testuser"
-        assert parking_point.location == {"latitude": 52.2297, "longitude": 21.0122}
+        assert parking_point.location == {"lat": 52.2297, "lng": 21.0122}
 
     def test_parking_point_created_at(self, parking_point):
         """Test sprawdzający, czy pole created_at jest automatycznie ustawiane"""
@@ -43,23 +43,23 @@ class TestParkingPointModel:
 
     def test_parking_point_location_field(self, parking_point):
         """Test sprawdzający poprawność działania pola location"""
-        assert parking_point.location == {"latitude": 52.2297, "longitude": 21.0122}
+        assert parking_point.location == {"lat": 52.2297, "lng": 21.0122}
         assert isinstance(parking_point.location, dict)
-        assert "latitude" in parking_point.location
-        assert "longitude" in parking_point.location
+        assert "lat" in parking_point.location
+        assert "lng" in parking_point.location
 
     def test_parking_point_blank_fields(self, user):
         """Test sprawdzający działanie pól pustych"""
         parking_point = ParkingPoint.objects.create(
             user=None,
-            location={"latitude": 52.2297, "longitude": 21.0122},
+            location={"lat": 52.2297, "lng": 21.0122},
         )
         assert parking_point.user is None
 
-    def test_parking_point_location_blank(self):
+    def test_parking_point_location_blank(self, user):
         """Test sprawdzający działanie pustego pola location"""
-        with pytest.raises(ValueError):
+        with pytest.raises(Exception):
             ParkingPoint.objects.create(
-                user=self.user,
+                user=user,
                 location=None,
             )

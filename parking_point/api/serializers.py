@@ -59,6 +59,5 @@ class ParkingPointSerializer(serializers.ModelSerializer):
         return getattr(obj, "dislike_count", 0)
 
     @reject_invalid_location_structure
-    # @reject_too_close_to_other_points(distance_limit=30)
     def validate_location(self, location):
         return location

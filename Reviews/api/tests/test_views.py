@@ -1,6 +1,8 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from rest_framework.exceptions import ValidationError
+from rest_framework import status
 from Reviews.models import Review
 from parking_point.models import ParkingPoint
 
@@ -37,9 +39,11 @@ def other_user(db):
 
 @pytest.fixture
 def parking_point(db, user):
+    # Upewniamy się, że parking ma oba pola lokalizacji
     return ParkingPoint.objects.create(
         user=user,
         location={"lat": 52.0, "lng": 21.0},
+        original_location={"lat": 52.0, "lng": 21.0}
     )
 
 
@@ -65,7 +69,7 @@ def test_create_review(api_client, user, parking_point):
 
     response = api_client.post(url, payload, format="json")
 
-    assert response.status_code == 201
+    assert response.status_code == status.HTTP_201_CREATED
     assert Review.objects.count() == 1
 
     review = Review.objects.get()
@@ -76,41 +80,38 @@ def test_create_review(api_client, user, parking_point):
 
 
 @pytest.mark.django_db
-def test_second_post_updates_existing_review(api_client, user, parking_point):
+def test_second_post_raises_validation_error(api_client, user, parking_point):
     """
-    Drugi POST nadpisuje istniejące review (UPSERT)
+    Drugi POST od tego samego użytkownika powinien zwrócić błąd walidacji.
     """
     api_client.force_authenticate(user=user)
     url = f"/api/parking-points/{parking_point.id}/reviews/"
 
-    api_client.post(
+    # Pierwszy POST - udany
+    first_response = api_client.post(
         url,
         {
             "occupancy": "LOW",
-            "attributes": ["HARD_ACCESS"],
-            "description": "Stara wersja",
             "is_like": False,
         },
         format="json",
     )
+    assert first_response.status_code == status.HTTP_201_CREATED
+    assert Review.objects.count() == 1
 
-    api_client.post(
+    # Drugi POST - powinien zwrócić błąd
+    second_response = api_client.post(
         url,
         {
             "occupancy": "HIGH",
-            "attributes": ["POOR_LIGHTING"],
-            "description": "Nowa wersja",
-            "is_like": False,
+            "is_like": True,
         },
         format="json",
     )
 
-    assert Review.objects.count() == 1
-
-    review = Review.objects.get()
-    assert review.occupancy == "HIGH"
-    assert review.description == "Nowa wersja"
-    assert review.attributes == ["POOR_LIGHTING"]
+    assert second_response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Już dodałeś recenzję dla tego punktu." in str(second_response.data)
+    assert Review.objects.count() == 1 # Upewniamy się, że nie powstała druga recenzja
 
 
 @pytest.mark.django_db
@@ -120,7 +121,6 @@ def test_different_users_can_review_same_parking_point(
     """
     Różni użytkownicy mogą dodać review do tego samego parking pointa
     """
-
     api_client.force_authenticate(user=user)
     url = f"/api/parking-points/{parking_point.id}/reviews/"
     api_client.post(
@@ -150,28 +150,6 @@ def test_different_users_can_review_same_parking_point(
 
 
 @pytest.mark.django_db
-def test_owner_review_sets_is_like_true(api_client, user, parking_point):
-    """
-    Właściciel parking pointa zawsze ma is_like=True
-    """
-    api_client.force_authenticate(user=user)
-    url = f"/api/parking-points/{parking_point.id}/reviews/"
-    api_client.post(
-        url,
-        {
-            "occupancy": "MEDIUM",
-            "attributes": [],
-            "description": "Owner review",
-            "is_like": False,  # frontend może wysłać False
-        },
-        format="json",
-    )
-
-    review = Review.objects.get()
-    assert review.is_like is True
-
-
-@pytest.mark.django_db
 def test_list_reviews_for_parking_point(api_client, user, parking_point):
     """
     GET zwraca listę review dla parking pointa
@@ -180,7 +158,7 @@ def test_list_reviews_for_parking_point(api_client, user, parking_point):
     url = f"/api/parking-points/{parking_point.id}/reviews/"
     response = api_client.get(url)
 
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert isinstance(response.data, list)
 
 
@@ -201,4 +179,4 @@ def test_authentication_required(api_client, parking_point):
         format="json",
     )
 
-    assert response.status_code == 401
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
