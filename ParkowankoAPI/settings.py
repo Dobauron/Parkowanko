@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "drf_spectacular",
     "django_rest_passwordreset",
+    "anymail", # Dodano Anymail
 
     # Third Party - Allauth & Social Login
     "allauth",
@@ -198,18 +199,17 @@ LOGGING = {
 }
 
 # ------------------------------------------------------------------------------
-# EMAIL SETTINGS
+# EMAIL SETTINGS (Anymail / Brevo)
 # ------------------------------------------------------------------------------
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
-    EMAIL_PORT = config("EMAIL_PORT", default=465, cast=int)
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-    DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER")
+    EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
+    DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@parkowanko.com")
+
+ANYMAIL = {
+    "SENDINBLUE_API_KEY": config("BREVO_API_KEY", default=""),
+}
 
 
 # ------------------------------------------------------------------------------
