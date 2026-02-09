@@ -3,29 +3,29 @@ from django.core.mail import send_mail
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.conf import settings
 
+
 @receiver(reset_password_token_created)
 def password_reset_token_created(
     sender, instance, reset_password_token, *args, **kwargs
 ):
-    # Tutaj budujemy treść maila, który pójdzie do użytkownika
     print("DEBUG: Sygnał resetu hasła wystartował!")
-    # URL Twojego frontendu (na razie lokalny, potem zmienisz na adres na Renderze/Vercelu)
+    
+    # URL Twojego frontendu
     frontend_url = "https://zygarios.github.io/parkowanko/reset-password"
-
-    # Tworzymy pełny link z tokenem jako parametrem
     reset_link = f"{frontend_url}?token={reset_password_token.key}"
 
-    email_plaintext_message = (
-        f"Cześć!\n\n"
-        f"Kliknij w poniższy link, aby ustawić nowe hasło:\n"
-        f"{reset_link}\n\n"
-        f"Jeśli to nie Ty prosiłeś o reset, zignoruj tę wiadomość."
-    )
+    email_plaintext_message = f"""Cześć!
 
+Kliknij w poniższy link, aby ustawić nowe hasło:
+{reset_link}
+
+Jeśli to nie Ty prosiłeś o reset, zignoruj tę wiadomość."""
+
+    # Używamy adresu na sztywno dla testu
     send_mail(
-        "Reset hasła w aplikacji Parkowanko",
-        email_plaintext_message,
-        settings.DEFAULT_FROM_EMAIL
-        [reset_password_token.user.email],
+        subject="Reset hasła w aplikacji Parkowanko",
+        message=email_plaintext_message,
+        from_email="parkowanko.app@gmail.com",
+        recipient_list=[reset_password_token.user.email],
         fail_silently=False,
     )
