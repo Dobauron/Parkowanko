@@ -20,12 +20,12 @@ Kliknij w poniższy link, aby ustawić nowe hasło:
 {reset_link}
 
 Jeśli to nie Ty prosiłeś o reset, zignoruj tę wiadomość."""
-
+    print(settings.DEFAULT_FROM_EMAIL)
     # Używamy adresu na sztywno dla testu
     send_mail(
         subject="Reset hasła w aplikacji Parkowanko",
         message=email_plaintext_message,
-        from_email="parkowanko.app@gmail.com",
+        from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[reset_password_token.user.email],
         fail_silently=False,
     )
