@@ -75,6 +75,18 @@ class ChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        user.delete()
+        return Response(
+            {"detail": "Konto zostało pomyślnie usunięte."},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
 User = get_user_model()
 
 

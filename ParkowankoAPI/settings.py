@@ -132,6 +132,7 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseFormParser",
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
+    "EXCEPTION_HANDLER": "ParkowankoAPI.exceptions.custom_exception_handler",
 }
 
 REST_AUTH = {
