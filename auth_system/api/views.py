@@ -20,6 +20,7 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
+from allauth.account.utils import send_email_confirmation
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -33,7 +34,13 @@ class RegisterView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        return Response(build_jwt_payload(user), status=status.HTTP_201_CREATED)
+        # Wysyłamy e-mail weryfikacyjny
+        send_email_confirmation(request, user)
+
+        return Response(
+            {"detail": "Wysłano e-mail weryfikacyjny."},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class ChangePasswordView(APIView):
@@ -53,7 +60,7 @@ class ChangePasswordView(APIView):
 
             if not user.check_password(old_password):
                 return Response(
-                    {"old_password": ["Wrong password."]},
+                    {"old_password": ["Błędne hasło."]},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -61,7 +68,7 @@ class ChangePasswordView(APIView):
             user.save()
 
             return Response(
-                {"detail": "Password has been changed successfully."},
+                {"detail": "Hasło zostało pomyślnie zmienione."},
                 status=status.HTTP_200_OK,
             )
 

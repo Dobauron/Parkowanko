@@ -90,7 +90,9 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_VERIFICATION = 'none' # Zmień na 'mandatory' na produkcji
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory' # Zmieniono na mandatory
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True # Weryfikacja po kliknięciu w link (GET)
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 
 # ------------------------------------------------------------------------------
 # PASSWORD VALIDATION
@@ -173,7 +175,7 @@ CORS_ALLOW_HEADERS = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"], # Dodano katalog templates
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -264,7 +266,24 @@ LOGIN_REDIRECT_URL = "/api/parking-points/"
 # Po wylogowaniu, wyrzuć go na Twój endpoint logowania:
 LOGOUT_REDIRECT_URL = "/api/auth/login/"
 
+# Zmieniono LOGIN_URL na poprawny endpoint API
+LOGIN_URL = "/api/auth/login/"
+
 # ------------------------------------------------------------------------------
 # ALLAUTH ADAPTER
 # ------------------------------------------------------------------------------
 SOCIALACCOUNT_ADAPTER = "auth_system.adapter.CustomSocialAccountAdapter"
+ACCOUNT_ADAPTER = "auth_system.adapter.CustomAccountAdapter"
+
+# ------------------------------------------------------------------------------
+# INTERNATIONALIZATION
+# ------------------------------------------------------------------------------
+LANGUAGE_CODE = "pl"  # Zmieniono na polski
+TIME_ZONE = "Europe/Warsaw" # Opcjonalnie: strefa czasowa
+USE_I18N = True
+USE_TZ = True
+
+# ------------------------------------------------------------------------------
+# FRONTEND URL
+# ------------------------------------------------------------------------------
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:4200")

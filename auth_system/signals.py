@@ -10,8 +10,8 @@ def password_reset_token_created(
 ):
     print("DEBUG: Sygnał resetu hasła wystartował!")
     
-    # URL Twojego frontendu
-    frontend_url = "https://zygarios.github.io/parkowanko/reset-password"
+    # URL Twojego frontendu pobierany z settings
+    frontend_url = f"{settings.FRONTEND_URL}/auth/reset-password"
     reset_link = f"{frontend_url}?token={reset_password_token.key}"
 
     email_plaintext_message = f"""Cześć!
@@ -20,8 +20,7 @@ Kliknij w poniższy link, aby ustawić nowe hasło:
 {reset_link}
 
 Jeśli to nie Ty prosiłeś o reset, zignoruj tę wiadomość."""
-    print(settings.DEFAULT_FROM_EMAIL)
-    # Używamy adresu na sztywno dla testu
+
     send_mail(
         subject="Reset hasła w aplikacji Parkowanko",
         message=email_plaintext_message,

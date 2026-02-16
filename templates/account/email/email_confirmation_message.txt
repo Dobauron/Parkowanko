@@ -1,0 +1,11 @@
+Cześć!
+
+Otrzymujesz ten e-mail, ponieważ zarejestrowałeś konto w serwisie Parkowanko używając adresu {{ user.email }}.
+
+Aby potwierdzić ten adres i aktywować konto, kliknij w poniższy link:
+{{ activate_url }}
+
+Jeśli to nie Ty zakładałeś konto, zignoruj tę wiadomość.
+
+Pozdrawiamy,
+Zespół Parkowanko

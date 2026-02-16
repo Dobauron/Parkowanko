@@ -1,4 +1,13 @@
+from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from django.conf import settings
+
+class CustomAccountAdapter(DefaultAccountAdapter):
+    def get_email_confirmation_url(self, request, emailconfirmation):
+        # URL frontendu pobierany z settings
+        # Format: https://parkowanko.pages.dev/potwierdz-rejestracje?token={key}
+        frontend_url = f"{settings.FRONTEND_URL}/potwierdz-rejestracje"
+        return f"{frontend_url}?token={emailconfirmation.key}"
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):

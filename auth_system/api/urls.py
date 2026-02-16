@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView
+from dj_rest_auth.registration.views import VerifyEmailView, ConfirmEmailView
 from .views import (
     RegisterView,
     ChangePasswordView,
@@ -19,5 +20,17 @@ urlpatterns = [
     path(
         "password-reset/",
         include("django_rest_passwordreset.urls", namespace="password_reset"),
+    ),
+    # Weryfikacja e-maila
+    path("verify-email/", VerifyEmailView.as_view(), name="rest_verify_email"),
+    path(
+        "account-confirm-email/<str:key>/",
+        VerifyEmailView.as_view(),
+        name="account_confirm_email",
+    ),
+    path(
+        "register/account-confirm-email/",
+        VerifyEmailView.as_view(),
+        name="account_email_verification_sent",
     ),
 ]
