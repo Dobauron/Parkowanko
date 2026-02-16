@@ -22,6 +22,10 @@ darmowe_parkingi_final.json
 *.json
 
 # --- Skrypty importowe i eksportowe (Management Commands) ---
-# Jeśli chcesz je zachować tylko u siebie lokalnie:
-parking_point/management/
+# Ignoruj wszystko w management, z wyjątkiem konkretnych plików
+parking_point/management/*
+!parking_point/management/commands/delete_expired_points.py
+!parking_point/management/commands/__init__.py
+!parking_point/management/__init__.py
+
 parking_point/services.py
