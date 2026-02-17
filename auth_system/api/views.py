@@ -103,14 +103,14 @@ class GoogleLoginView(SocialLoginView):
     # callback_url musi być identyczny z redirect_uri użytym przez frontend
     # Pobieramy go z settings.FRONTEND_URL (np. https://parkowanko.pages.dev)
     # Jeśli frontend używa konkretnej ścieżki, np. /auth/google/callback, dodaj ją tutaj
-    callback_url = settings.FRONTEND_URL 
+    callback_url = f"{settings.FRONTEND_URL}{settings.GOOGLE_CALLBACK_PATH}"
     client_class = OAuth2Client
 
 class FacebookLoginView(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
     client_class = OAuth2Client
     # callback_url zależy od konfiguracji frontendu
-    callback_url = settings.FRONTEND_URL
+    callback_url = f"{settings.FRONTEND_URL}{settings.FACEBOOK_CALLBACK_PATH}"
 
 
 class CustomTokenRefreshView(TokenRefreshView):
