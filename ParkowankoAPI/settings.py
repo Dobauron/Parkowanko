@@ -300,5 +300,5 @@ USE_TZ = True
 # FRONTEND URL
 # ------------------------------------------------------------------------------
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:4200")
-GOOGLE_CALLBACK_PATH = config("GOOGLE_CALLBACK_PATH", default="/social/auth/google/callback")
-FACEBOOK_CALLBACK_PATH = config("FACEBOOK_CALLBACK_PATH", default="/social/auth/facebook/callback")
+GOOGLE_CALLBACK_PATH = config("GOOGLE_CALLBACK_PATH", default="/auth/social/google/callback")
+FACEBOOK_CALLBACK_PATH = config("FACEBOOK_CALLBACK_PATH", default="/auth/social/facebook/callback")
