@@ -143,6 +143,7 @@ REST_FRAMEWORK = {
         "anon": "100/day",
         "user": "1000/day",
         "resend_email": "5/hour",  # Limit: 5 prób na godzinę
+        "dj_rest_auth": "1000/day", # Dodano brakujący scope dla dj-rest-auth
     },
 }
 
@@ -299,5 +300,5 @@ USE_TZ = True
 # FRONTEND URL
 # ------------------------------------------------------------------------------
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:4200")
-GOOGLE_CALLBACK_PATH = config("GOOGLE_CALLBACK_PATH", default="/auth/google/callback")
-FACEBOOK_CALLBACK_PATH = config("FACEBOOK_CALLBACK_PATH", default="/auth/facebook/callback")
+GOOGLE_CALLBACK_PATH = config("GOOGLE_CALLBACK_PATH", default="/social/auth/google/callback")
+FACEBOOK_CALLBACK_PATH = config("FACEBOOK_CALLBACK_PATH", default="/social/auth/facebook/callback")
