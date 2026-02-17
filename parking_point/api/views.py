@@ -19,6 +19,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from decouple import config
+from drf_spectacular.utils import extend_schema
 
 
 class ParkingPointViewSet(viewsets.ModelViewSet):
@@ -58,6 +59,7 @@ class CronDeleteExpiredPointsView(APIView):
     """
     permission_classes = [AllowAny] # Dostępny publicznie, ale zabezpieczony kluczem
 
+    @extend_schema(responses={200: None})
     def get(self, request):
         secret = request.query_params.get("secret")
         expected_secret = config("CRON_SECRET_KEY", default="tajny-klucz-lokalny")

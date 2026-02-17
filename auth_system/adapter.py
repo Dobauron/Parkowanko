@@ -5,8 +5,8 @@ from django.conf import settings
 class CustomAccountAdapter(DefaultAccountAdapter):
     def get_email_confirmation_url(self, request, emailconfirmation):
         # URL frontendu pobierany z settings
-        # Format: https://parkowanko.pages.dev/potwierdz-rejestracje?token={key}
-        frontend_url = f"{settings.FRONTEND_URL}/potwierdz-rejestracje"
+        # Format: https://parkowanko.pages.dev/auth/potwierdz-rejestracje?token={key}
+        frontend_url = f"{settings.FRONTEND_URL}/auth/potwierdz-rejestracje"
         return f"{frontend_url}?token={emailconfirmation.key}"
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
