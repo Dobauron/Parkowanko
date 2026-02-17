@@ -1,6 +1,11 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView
 from dj_rest_auth.registration.views import VerifyEmailView, ConfirmEmailView
+from django_rest_passwordreset.views import (
+    ResetPasswordRequestToken,
+    ResetPasswordConfirm,
+    ResetPasswordValidateToken,
+)
 from .views import (
     RegisterView,
     ChangePasswordView,
@@ -9,6 +14,7 @@ from .views import (
     LoginView,
     CustomTokenRefreshView,
     DeleteAccountView,
+    ResendEmailVerificationView,
 )
 
 urlpatterns = [
@@ -22,23 +28,33 @@ urlpatterns = [
     path("token/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("user/delete/", DeleteAccountView.as_view(), name="delete_account"),
+    
+    # Password Reset (Ręczna definicja URL-i, aby zmienić validate_token na validate-token)
     path(
         "password-reset/",
-        include("django_rest_passwordreset.urls", namespace="password_reset"),
+        ResetPasswordRequestToken.as_view(),
+        name="password_reset_request",
+    ),
+    path(
+        "password-reset/confirm/",
+        ResetPasswordConfirm.as_view(),
+        name="password_reset_confirm",
+    ),
+    path(
+        "password-reset/validate-token/",  # Zmieniono na myślnik
+        ResetPasswordValidateToken.as_view(),
+        name="password_reset_validate_token",
     ),
     
     # Email Verification
-    # Endpoint dla frontendu (POST z kluczem)
     path("register/confirm-email/", VerifyEmailView.as_view(), name="rest_verify_email"),
     
-    # Endpoint do ponownego wysłania maila (POST z emailem)
     path(
         "register/resend-confirm-email/",
-        VerifyEmailView.as_view(),
+        ResendEmailVerificationView.as_view(),
         name="account_email_verification_sent",
     ),
     
-    # Endpoint wewnętrzny dla allauth (musi zostać, ale ukryjemy go w Swaggerze jeśli chcesz)
     path(
         "account-confirm-email/<str:key>/",
         VerifyEmailView.as_view(),

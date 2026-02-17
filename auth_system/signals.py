@@ -11,7 +11,8 @@ def password_reset_token_created(
     print("DEBUG: Sygnał resetu hasła wystartował!")
     
     # URL Twojego frontendu pobierany z settings
-    frontend_url = f"{settings.FRONTEND_URL}/auth/reset-password"
+    # Format: {FRONTEND_URL}/auth/zmien-haslo?token={key}
+    frontend_url = f"{settings.FRONTEND_URL}/auth/zmien-haslo"
     reset_link = f"{frontend_url}?token={reset_password_token.key}"
 
     email_plaintext_message = f"""Cześć!

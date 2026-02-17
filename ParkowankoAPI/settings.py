@@ -133,6 +133,17 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
     "EXCEPTION_HANDLER": "ParkowankoAPI.exceptions.custom_exception_handler",
+    # Throttling (Rate Limiting)
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/day",
+        "user": "1000/day",
+        "resend_email": "5/hour",  # Limit: 5 prób na godzinę
+    },
 }
 
 REST_AUTH = {
