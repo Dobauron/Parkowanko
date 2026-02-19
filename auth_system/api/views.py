@@ -22,7 +22,8 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView, VerifyEmailView, ResendEmailVerificationView as BaseResendView
 from allauth.account.utils import send_email_confirmation
 from rest_framework.throttling import ScopedRateThrottle
-from django.conf import settings # Dodano import settings
+from django.conf import settings
+from django.urls import reverse
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -49,8 +50,8 @@ class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request=ChangePasswordSerializer,  # Definiuje schemat dla danych wejściowych (żądania)
-        responses={200: None},  # Definiuje schemat dla odpowiedzi
+        request=ChangePasswordSerializer,
+        responses={200: None},
     )
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -100,18 +101,19 @@ User = get_user_model()
 
 class GoogleLoginView(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    # callback_url musi być identyczny z redirect_uri użytym przez frontend
-    # Pobieramy go z settings.FRONTEND_URL (np. https://parkowanko.pages.dev)
-    # Jeśli frontend używa konkretnej ścieżki, np. /auth/google/callback, dodaj ją tutaj
-    callback_url = f"{settings.FRONTEND_URL}{settings.GOOGLE_CALLBACK_PATH}"
     client_class = OAuth2Client
+
+    @property
+    def callback_url(self):
+        return self.request.build_absolute_uri(reverse("google_callback"))
 
 class FacebookLoginView(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
     client_class = OAuth2Client
-    # callback_url zależy od konfiguracji frontendu
-    callback_url = f"{settings.FRONTEND_URL}{settings.FACEBOOK_CALLBACK_PATH}"
 
+    @property
+    def callback_url(self):
+        return self.request.build_absolute_uri(reverse("facebook_callback"))
 
 class CustomTokenRefreshView(TokenRefreshView):
     serializer_class = CustomTokenRefreshSerializer
