@@ -82,7 +82,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-SITE_ID = 1 # Musi pasować do ID w Django Admin -> Sites
+SITE_ID = config("SITE_ID", default=1, cast=int)
 
 # Allauth / Account Settings
 ACCOUNT_LOGIN_METHODS = {'email'}
@@ -206,9 +206,13 @@ LOGGING = {
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "loggers": {
-        "parking_point.utils.location_clustering": {
+        "django": {
             "handlers": ["console"],
             "level": "INFO",
+        },
+        "allauth": {  # Dodaj to!
+            "handlers": ["console"],
+            "level": "DEBUG",
         },
     },
 }
@@ -240,7 +244,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'key': ''  # zostaw puste
         },
         'SCOPE': [
-            'profile',
             'email',
         ],
         'AUTH_PARAMS': {
@@ -270,17 +273,17 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
-
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:4200")
 
 # Po udanym logowaniu przez Google, przekieruj go np. do Twojej dokumentacji
 # lub na listę parkingów, żeby sprawdzić czy działa:
-LOGIN_REDIRECT_URL = "/api/parking-points/"
+LOGIN_REDIRECT_URL = FRONTEND_URL
 
 # Po wylogowaniu, wyrzuć go na Twój endpoint logowania:
-LOGOUT_REDIRECT_URL = "/api/auth/login/"
+LOGOUT_REDIRECT_URL = FRONTEND_URL
 
 # Zmieniono LOGIN_URL na poprawny endpoint API
-LOGIN_URL = "/api/auth/login/"
+LOGIN_URL = FRONTEND_URL
 
 # ------------------------------------------------------------------------------
 # ALLAUTH ADAPTER
@@ -299,6 +302,5 @@ USE_TZ = True
 # ------------------------------------------------------------------------------
 # FRONTEND URL
 # ------------------------------------------------------------------------------
-FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:4200")
-GOOGLE_CALLBACK_PATH = config("GOOGLE_CALLBACK_PATH", default="/auth/social/google/callback")
-FACEBOOK_CALLBACK_PATH = config("FACEBOOK_CALLBACK_PATH", default="/auth/social/facebook/callback")
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
