@@ -9,17 +9,17 @@ from django_rest_passwordreset.views import (
 from .views import (
     RegisterView,
     ChangePasswordView,
-    GoogleLoginView,
     FacebookLoginView,
     LoginView,
     CustomTokenRefreshView,
     DeleteAccountView,
     ResendEmailVerificationView,
+    GoogleOneTapLoginView,
 )
 
 urlpatterns = [
     # Social Auth
-    path("social/google/", GoogleLoginView.as_view(), name="google_login"),
+    path("social/google/credential/", GoogleOneTapLoginView.as_view(), name="google_one_tap_login"),
     path("social/facebook/", FacebookLoginView.as_view(), name="facebook_login"),
     
     # Standard Auth
@@ -29,7 +29,7 @@ urlpatterns = [
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("user/delete/", DeleteAccountView.as_view(), name="delete_account"),
     
-    # Password Reset (Ręczna definicja URL-i, aby zmienić validate_token na validate-token)
+    # Password Reset
     path(
         "password-reset/",
         ResetPasswordRequestToken.as_view(),
@@ -41,7 +41,7 @@ urlpatterns = [
         name="password_reset_confirm",
     ),
     path(
-        "password-reset/validate-token/",  # Zmieniono na myślnik
+        "password-reset/validate-token/",
         ResetPasswordValidateToken.as_view(),
         name="password_reset_validate_token",
     ),

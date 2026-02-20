@@ -37,7 +37,6 @@ INSTALLED_APPS = [
 
     # Third Party - API & Security
     "rest_framework",
-    "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
@@ -62,11 +61,11 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware", # Przywrócono (wymagane przez allauth)
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware", # Przywrócono (wymagane przez allauth)
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware", # Niezbędne dla logowania Google
 ]
@@ -151,6 +150,7 @@ REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'parkowanko-access-token',
     'JWT_AUTH_REFRESH_COOKIE': 'parkowanko-refresh-token',
+    'TOKEN_MODEL': None, # Wyłączamy standardowe tokeny
 }
 
 SIMPLE_JWT = {
@@ -244,7 +244,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'key': ''  # zostaw puste
         },
         'SCOPE': [
-            'email',
+            "profile",
+            "email",
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
@@ -275,16 +276,6 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:4200")
 
-# Po udanym logowaniu przez Google, przekieruj go np. do Twojej dokumentacji
-# lub na listę parkingów, żeby sprawdzić czy działa:
-LOGIN_REDIRECT_URL = FRONTEND_URL
-
-# Po wylogowaniu, wyrzuć go na Twój endpoint logowania:
-LOGOUT_REDIRECT_URL = FRONTEND_URL
-
-# Zmieniono LOGIN_URL na poprawny endpoint API
-LOGIN_URL = FRONTEND_URL
-
 # ------------------------------------------------------------------------------
 # ALLAUTH ADAPTER
 # ------------------------------------------------------------------------------
@@ -303,4 +294,3 @@ USE_TZ = True
 # FRONTEND URL
 # ------------------------------------------------------------------------------
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
