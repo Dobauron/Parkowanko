@@ -27,8 +27,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", include("auth_system.api.urls")),
     path("api/parking-points/", include("parking_point.api.urls")),
-    # To jest potrzebne dla ogólnych mechanizmów (callbacki itp.)
-    path('accounts/', include('allauth.urls')),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/",

@@ -11,6 +11,11 @@ from allauth.account.models import EmailAddress
 from rest_framework.exceptions import AuthenticationFailed
 
 
+class UserPayloadSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    username = serializers.CharField()
+    roles = serializers.ListField(child=serializers.CharField())
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
@@ -75,3 +80,16 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
         )
 
         return data
+
+class GoogleOneTapSerializer(serializers.Serializer):
+    credential = serializers.CharField()
+
+class JWTResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()
+    refresh = serializers.CharField()
+    expires_in = serializers.IntegerField()
+    user = UserPayloadSerializer()
+
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+    details = serializers.CharField(required=False)
