@@ -1,9 +1,7 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView
-from dj_rest_auth.registration.views import VerifyEmailView, ConfirmEmailView
+from dj_rest_auth.registration.views import ConfirmEmailView
 from django_rest_passwordreset.views import (
-    ResetPasswordRequestToken,
-    ResetPasswordConfirm,
     ResetPasswordValidateToken,
 )
 from .views import (
@@ -15,6 +13,9 @@ from .views import (
     DeleteAccountView,
     ResendEmailVerificationView,
     GoogleOneTapLoginView,
+    CustomResetPasswordRequestToken,
+    CustomResetPasswordConfirm, # Dodano
+    CustomVerifyEmailView,
 )
 
 urlpatterns = [
@@ -32,12 +33,12 @@ urlpatterns = [
     # Password Reset
     path(
         "password-reset/",
-        ResetPasswordRequestToken.as_view(),
+        CustomResetPasswordRequestToken.as_view(),
         name="password_reset_request",
     ),
     path(
         "password-reset/confirm/",
-        ResetPasswordConfirm.as_view(),
+        CustomResetPasswordConfirm.as_view(), # Używamy niestandardowego widoku
         name="password_reset_confirm",
     ),
     path(
@@ -47,7 +48,7 @@ urlpatterns = [
     ),
     
     # Email Verification
-    path("register/confirm-email/", VerifyEmailView.as_view(), name="rest_verify_email"),
+    path("register/confirm-email/", CustomVerifyEmailView.as_view(), name="rest_verify_email"),
     
     path(
         "register/resend-confirm-email/",
@@ -57,7 +58,7 @@ urlpatterns = [
     
     path(
         "account-confirm-email/<str:key>/",
-        VerifyEmailView.as_view(),
+        CustomVerifyEmailView.as_view(),
         name="account_confirm_email",
     ),
 ]
