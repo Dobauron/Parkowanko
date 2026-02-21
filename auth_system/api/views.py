@@ -29,6 +29,13 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.contrib.auth.models import Group
 
+# Imports for Custom Password Reset
+from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
+from django_rest_passwordreset.models import ResetPasswordToken
+from allauth.account.models import EmailAddress, EmailConfirmation, EmailConfirmationHMAC
+from rest_framework.exceptions import ValidationError
+from django.http import Http404
+
 User = get_user_model()
 
 class LoginView(TokenObtainPairView):
@@ -101,6 +108,63 @@ class ResendEmailVerificationView(BaseResendView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'resend_email'
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            return Response({"detail": "E-mail weryfikacyjny został wysłany ponownie."}, status=status.HTTP_200_OK)
+        return response
+
+
+class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email jest wymagany'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            email_address = EmailAddress.objects.get(email__iexact=email)
+            if not email_address.verified:
+                raise ValidationError("Adres e-mail nie został zweryfikowany. Sprawdź swoją skrzynkę email.")
+        except EmailAddress.DoesNotExist:
+            # Nie informujemy, że e-mail nie istnieje, aby nie ujawniać danych użytkowników
+            pass
+        except ValidationError as e:
+            return Response({'error': e.detail[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Jeśli e-mail jest zweryfikowany (lub nie istnieje), kontynuuj standardową logikę
+        response = super().post(request, *args, **kwargs)
+        
+        if response.status_code == status.HTTP_200_OK:
+             return Response({"detail": "Link do resetowania hasła został wysłany na podany adres e-mail."}, status=status.HTTP_200_OK)
+        
+        return response
+
+class CustomResetPasswordConfirm(ResetPasswordConfirm):
+    @extend_schema(
+        responses={
+            200: JWTResponseSerializer,
+            400: ErrorResponseSerializer
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        # Pobierz użytkownika przed zmianą hasła
+        try:
+            token = request.data.get('token')
+            reset_password_token = ResetPasswordToken.objects.get(key=token)
+            user = reset_password_token.user
+        except ResetPasswordToken.DoesNotExist:
+            # Jeśli token nie istnieje, pozwól super().post() obsłużyć błąd
+            user = None
+
+        response = super().post(request, *args, **kwargs)
+        
+        if response.status_code == status.HTTP_200_OK and user:
+            # Jeśli hasło zostało zmienione, wygeneruj tokeny JWT
+            jwt_payload = build_jwt_payload(user)
+            return Response(jwt_payload, status=status.HTTP_200_OK)
+            
+        return response
+
 
 class GoogleOneTapLoginView(APIView):
     @extend_schema(
@@ -166,3 +230,44 @@ class FacebookLoginView(SocialLoginView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     serializer_class = CustomTokenRefreshSerializer
+
+class CustomVerifyEmailView(VerifyEmailView):
+    @extend_schema(
+        responses={
+            200: JWTResponseSerializer,
+            400: ErrorResponseSerializer
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        # Najpierw wykonaj standardową weryfikację
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.kwargs['key'] = serializer.validated_data['key']
+        
+        # Pobierz obiekt potwierdzenia (to jest logika skopiowana z VerifyEmailView, aby dostać usera)
+        confirmation = self.get_object()
+        confirmation.confirm(self.request)
+        
+        # Po potwierdzeniu, pobierz użytkownika
+        user = confirmation.email_address.user
+        
+        # Wygeneruj tokeny JWT
+        jwt_payload = build_jwt_payload(user)
+        
+        return Response(jwt_payload, status=status.HTTP_200_OK)
+
+    def get_object(self):
+        # Ta metoda jest potrzebna, aby pobrać obiekt potwierdzenia na podstawie klucza
+        key = self.kwargs['key']
+        emailconfirmation = EmailConfirmationHMAC.from_key(key)
+        if not emailconfirmation:
+            if getattr(settings, 'ACCOUNT_EMAIL_CONFIRMATION_HMAC', True):
+                try:
+                    emailconfirmation = EmailConfirmation.objects.get(key=key)
+                except EmailConfirmation.DoesNotExist:
+                    if not emailconfirmation:
+                        raise Http404()
+            else:
+                if not emailconfirmation:
+                    raise Http404()
+        return emailconfirmation

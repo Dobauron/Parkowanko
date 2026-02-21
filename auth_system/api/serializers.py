@@ -25,7 +25,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if getattr(settings, 'ACCOUNT_EMAIL_VERIFICATION', 'none') == 'mandatory':
             email_address = EmailAddress.objects.filter(user=self.user, email=self.user.email).first()
             if not email_address or not email_address.verified:
-                raise AuthenticationFailed("Adres e-mail nie został zweryfikowany.")
+                raise AuthenticationFailed("Adres e-mail nie został zweryfikowany. Sprawdź swoją skrzynkę email.")
 
         data["expires_in"] = int(
             settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
