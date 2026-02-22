@@ -294,3 +294,4 @@ USE_TZ = True
 # FRONTEND URL
 # ------------------------------------------------------------------------------
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""

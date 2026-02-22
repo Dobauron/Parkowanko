@@ -33,7 +33,8 @@ class TestRegisterSerializer:
         serializer = RegisterSerializer(data=data)
         assert not serializer.is_valid()  # Oczekujemy, że dane będą niepoprawne
         assert "email" in serializer.errors  # Błąd związany z adresem email
-        assert "Enter a valid email address." in serializer.errors["email"]
+        # Dostosowano do polskiego komunikatu
+        assert "Podaj poprawny adres e-mail." in str(serializer.errors["email"])
 
     def test_register_serializer_missing_username(self):
         data = {
@@ -45,7 +46,8 @@ class TestRegisterSerializer:
         serializer = RegisterSerializer(data=data)
         assert not serializer.is_valid()  # Oczekujemy, że dane będą niepoprawne
         assert "username" in serializer.errors  # Brakujące pole 'username'
-        assert "This field may not be blank." in serializer.errors["username"]
+        # Dostosowano do polskiego komunikatu
+        assert "To pole nie może być puste." in str(serializer.errors["username"])
 
     def test_register_serializer_short_password(self):
         data = {
@@ -56,14 +58,14 @@ class TestRegisterSerializer:
 
         serializer = RegisterSerializer(data=data)
         is_valid = serializer.is_valid()
-        print(serializer.errors)  # Dodanie debugowania, aby zobaczyć błędy
-
+        
         assert not is_valid  # Oczekujemy, że dane będą niepoprawne
         assert "password" in serializer.errors  # Błąd związany z hasłem
 
-        # Sprawdzenie pełnej treści błędu
-        error_message = serializer.errors["password"]["password"][0]
-        assert "It must contain at least 8 characters." in error_message
+        # Sprawdzenie treści błędu w bezpieczniejszy sposób
+        error_content = str(serializer.errors["password"])
+        # Komunikat może się różnić w zależności od konfiguracji walidatorów
+        assert "To hasło jest za krótkie." in error_content or "Musi zawierać co najmniej 8 znaków." in error_content
 
 
 @pytest.mark.django_db

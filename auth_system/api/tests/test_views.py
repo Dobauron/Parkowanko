@@ -17,9 +17,10 @@ class TestRegisterView:
 
         response = self.client.post(
             "/api/auth/register/", data, format="json"
-        )  # Dodaj pełną ścieżkę URL
+        )
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data["user"]["username"] == data["username"]
+        # Zmieniono asercję, ponieważ widok zwraca teraz tylko komunikat
+        assert response.data["detail"] == "Wysłano e-mail weryfikacyjny."
 
         # Sprawdzenie, czy użytkownik został zapisany w bazie danych
         user = get_user_model().objects.get(email=data["email"])
@@ -34,7 +35,7 @@ class TestRegisterView:
 
         response = self.client.post(
             "/api/auth/register/", data, format="json"
-        )  # Dodaj pełną ścieżkę URL
+        )
         assert response.status_code == 400  # Oczekujemy błędu 400 (bad request)
 
         # Sprawdź, czy odpowiedź zawiera błędy dla 'email' i 'username'
@@ -62,9 +63,10 @@ class TestChangePasswordView:
 
         response = self.client.post(
             "/api/auth/change-password/", data, format="json"
-        )  # Dodaj pełną ścieżkę URL
+        )
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["detail"] == "Password has been changed successfully."
+        # Dostosowano do polskiego komunikatu
+        assert response.data["detail"] == "Hasło zostało pomyślnie zmienione."
 
         user.refresh_from_db()
         assert user.check_password("newsecurepassword")
@@ -84,10 +86,11 @@ class TestChangePasswordView:
 
         response = self.client.post(
             "/api/auth/change-password/", data, format="json"
-        )  # Dodaj pełną ścieżkę URL
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "old_password" in response.data
-        assert response.data["old_password"] == ["Wrong password."]
+        # Dostosowano do polskiego komunikatu
+        assert response.data["old_password"] == ["Błędne hasło."]
 
     def test_change_password_invalid_data(self):
         user = get_user_model().objects.create_user(
@@ -104,6 +107,6 @@ class TestChangePasswordView:
 
         response = self.client.post(
             "/api/auth/change-password/", data, format="json"
-        )  # Dodaj pełną ścieżkę URL
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "new_password" in response.data
