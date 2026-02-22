@@ -3,6 +3,7 @@ import logging
 
 from django.conf import settings
 from django.db import transaction
+from django.contrib.gis.geos import Point # Import Point
 
 from parking_point_edit_location.models import ParkingPointEditLocation
 from .geo_utils import haversine
@@ -41,11 +42,12 @@ def cluster_suggestions_by_distance(suggestions, max_distance):
 
     for suggestion in suggestions:
         placed = False
-        lat1, lng1 = suggestion.location["lat"], suggestion.location["lng"]
+        # Używamy .y (lat) i .x (lng) dla obiektów Point
+        lat1, lng1 = suggestion.location.y, suggestion.location.x
 
         for cluster in clusters:
             for other in cluster:
-                lat2, lng2 = other.location["lat"], other.location["lng"]
+                lat2, lng2 = other.location.y, other.location.x
                 if haversine(lat1, lng1, lat2, lng2) <= max_distance:
                     cluster.append(suggestion)
                     placed = True
@@ -63,13 +65,11 @@ def median_location_for_cluster(cluster):
     """
     Liczy medianę współrzędnych dla klastra.
     """
-    lats = [s.location["lat"] for s in cluster]
-    lngs = [s.location["lng"] for s in cluster]
+    lats = [s.location.y for s in cluster]
+    lngs = [s.location.x for s in cluster]
 
-    return {
-        "lat": float(np.median(lats)),
-        "lng": float(np.median(lngs)),
-    }
+    # Zwracamy obiekt Point
+    return Point(float(np.median(lngs)), float(np.median(lats)), srid=4326)
 
 
 # ============================================================

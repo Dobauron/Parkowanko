@@ -4,6 +4,25 @@ from datetime import timedelta
 from decouple import config
 
 # ------------------------------------------------------------------------------
+# tylko lokalne test POSTgis, po działaniu usunac na preprodukcji
+# ------------------------------------------------------------------------------
+import os
+
+if os.name == 'nt':  # Tylko dla Windows
+    # Twoja ścieżka z AppData
+    OSGEO4W_ROOT = r"C:\Users\safet\AppData\Local\Programs\OSGeo4W"
+
+    # Dodajemy folder bin do PATH
+    os.environ['PATH'] = os.path.join(OSGEO4W_ROOT, 'bin') + os.pathsep + os.environ['PATH']
+
+    # Wskaż konkretny plik, który znalazłeś (popraw nazwę, jeśli jest inna!)
+    GDAL_LIBRARY_PATH = os.path.join(OSGEO4W_ROOT, 'bin', 'gdal312.dll')
+    GEOS_LIBRARY_PATH = os.path.join(OSGEO4W_ROOT, 'bin', 'geos_c.dll')
+
+    # Dane pomocnicze
+    os.environ['PROJ_LIB'] = os.path.join(OSGEO4W_ROOT, 'share', 'proj')
+    os.environ['GDAL_DATA'] = os.path.join(OSGEO4W_ROOT, 'share', 'gdal')
+# ------------------------------------------------------------------------------
 # BASE DIRECTORY & CORE SETTINGS
 # ------------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +46,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites", # Wymagane dla allauth
+    "django.contrib.gis", # Dodano obsługę GIS
+    "django.contrib.postgres", # Dodano obsługę PostgreSQL (ArrayField itp.)
 
     # My Apps
     "auth_system",
@@ -73,7 +94,12 @@ MIDDLEWARE = [
 # ------------------------------------------------------------------------------
 # DATABASE & AUTHENTICATION CONFIG
 # ------------------------------------------------------------------------------
-DATABASES = {"default": dj_database_url.config(default=config("DATABASE_URL"))}
+DATABASES = {
+    "default": dj_database_url.config(
+        default=config("DATABASE_URL"),
+        engine="django.contrib.gis.db.backends.postgis" # Zmieniono silnik na PostGIS
+    )
+}
 
 AUTH_USER_MODEL = "auth_system.Account"
 AUTHENTICATION_BACKENDS = [

@@ -7,7 +7,7 @@ from django.conf import settings
 from rest_framework.permissions import IsAdminUser, AllowAny
 from ..mock_data.seed import seed_all
 from drf_spectacular.utils import extend_schema  # Importuj jeśli używasz Swaggera
-
+import traceback # Dodano import
 
 class ResetDatabaseMockDataView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -53,7 +53,8 @@ class ResetDatabaseMockDataView(APIView):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            # Warto wiedzieć, co dokładnie wybuchło
+            # Wypisz pełny traceback do konsoli
+            traceback.print_exc()
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

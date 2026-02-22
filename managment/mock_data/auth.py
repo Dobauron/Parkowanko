@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from allauth.account.models import EmailAddress # Import EmailAddress
 
 User = get_user_model()
 
@@ -26,6 +27,14 @@ def create_users():
         if created:
             user.set_password("test1234")
             user.save(update_fields=["password", "username", "is_active"])
+            
+            # Automatyczna weryfikacja e-maila dla userów testowych
+            EmailAddress.objects.create(
+                user=user,
+                email=email,
+                verified=True,
+                primary=True
+            )
         else:
             # upewniamy się, że username jest ustawione, jeśli użytkownik już istnieje
             if not user.username:
@@ -49,6 +58,14 @@ def create_users():
     if created:
         admin_user.set_password("adminadmin")
         admin_user.save(update_fields=["password"])
+        
+        # Automatyczna weryfikacja e-maila dla admina
+        EmailAddress.objects.create(
+            user=admin_user,
+            email=admin_email,
+            verified=True,
+            primary=True
+        )
 
     users["admin"] = admin_user
 

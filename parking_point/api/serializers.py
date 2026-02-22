@@ -1,15 +1,38 @@
 from rest_framework import serializers
-from .validators import (
-    reject_invalid_location_structure,
-)
+from django.contrib.gis.geos import Point
 from ..models import ParkingPoint
 from drf_spectacular.utils import extend_schema_field
+
+
+class LatLngField(serializers.Field):
+    """
+    Niestandardowe pole serializera do konwersji między Point a {"lat": ..., "lng": ...}
+    """
+    def to_representation(self, value):
+        # Konwersja z obiektu Point na JSON
+        if value and isinstance(value, Point):
+            return {
+                "lat": value.y,
+                "lng": value.x
+            }
+        return None
+
+    def to_internal_value(self, data):
+        # Konwersja z JSON na obiekt Point
+        try:
+            lat = float(data.get("lat"))
+            lng = float(data.get("lng"))
+            return Point(lng, lat, srid=4326)
+        except (TypeError, ValueError, AttributeError):
+            raise serializers.ValidationError("Nieprawidłowy format lokalizacji. Oczekiwano {'lat': float, 'lng': float}.")
 
 
 class ParkingPointSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     like_count = serializers.SerializerMethodField()
     dislike_count = serializers.SerializerMethodField()
+    # Używamy naszego niestandardowego pola
+    location = LatLngField()
 
     class Meta:
         model = ParkingPoint
@@ -57,7 +80,3 @@ class ParkingPointSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.IntegerField)
     def get_dislike_count(self, obj):
         return getattr(obj, "dislike_count", 0)
-
-    @reject_invalid_location_structure
-    def validate_location(self, location):
-        return location
