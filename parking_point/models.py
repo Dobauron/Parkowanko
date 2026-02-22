@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.gis.db import models as gis_models # Import dla pól GIS
 from auth_system.models import Account
 from multiselectfield import MultiSelectField
 from django.utils.translation import gettext_lazy as _
@@ -13,12 +14,12 @@ class ParkingPoint(models.Model):
         blank=True,
         related_name="parking_point",
     )
-    # Pole dla szerokości i długości geograficznej
-    original_location = models.JSONField(
-        verbose_name="original-coordinates", null=False, blank=False
+    # Pole dla szerokości i długości geograficznej (PostGIS)
+    original_location = gis_models.PointField(
+        verbose_name="original-coordinates", srid=4326, null=False, blank=False
     )
-    location = models.JSONField(
-        verbose_name="current-location", null=False, blank=False
+    location = gis_models.PointField(
+        verbose_name="current-location", srid=4326, null=False, blank=False
     )
     # Metadane czasowe
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Utworzono")

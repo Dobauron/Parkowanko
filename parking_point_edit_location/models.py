@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.gis.db import models as gis_models # Import GIS
 from parking_point.models import ParkingPoint
 from django.contrib.auth import get_user_model
 
@@ -10,7 +11,8 @@ class ParkingPointEditLocation(models.Model):
     parking_point = models.ForeignKey(
         ParkingPoint, on_delete=models.CASCADE, related_name="location_edits"
     )
-    location = models.JSONField(verbose_name="coordynaty")
+    # Zmiana na PointField
+    location = gis_models.PointField(verbose_name="coordynaty", srid=4326)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

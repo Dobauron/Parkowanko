@@ -1,6 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from parking_point.models import ParkingPoint
+from django.contrib.gis.geos import Point # Import Point
 
 
 def create_parking_points(users):
@@ -9,39 +10,40 @@ def create_parking_points(users):
     """
     now = timezone.now()
 
+    # Uwaga: Point przyjmuje (długość/lng, szerokość/lat)
     parking_points_data = [
         {
             "key": "warszawa_centrum",
             "user": users["alice"],
-            "location": {"lat": 52.22977, "lng": 21.01178},
+            "location": Point(21.01178, 52.22977, srid=4326),
             "address": "Warszawa, Centrum",
             "marked_for_deletion_at": None,
         },
         {
             "key": "krakow_rynek",
             "user": users["bob"],
-            "location": {"lat": 50.06143, "lng": 19.93658},
+            "location": Point(19.93658, 50.06143, srid=4326),
             "address": "Kraków, Rynek Główny",
             "marked_for_deletion_at": None,
         },
         {
             "key": "gdansk_molo",
             "user": users["charlie"],
-            "location": {"lat": 54.44469, "lng": 18.56722},
+            "location": Point(18.56722, 54.44469, srid=4326),
             "address": "Gdańsk, Molo",
             "marked_for_deletion_at": None,
         },
         {
             "key": "poznan_stare_miasto",
             "user": users["diana"],
-            "location": {"lat": 52.40828, "lng": 16.93352},
+            "location": Point(16.93352, 52.40828, srid=4326),
             "address": "Poznań, Stare Miasto",
             "marked_for_deletion_at": None,
         },
         {
             "key": "wroclaw_rynek",
             "user": users["alice"],
-            "location": {"lat": 51.10933, "lng": 17.03258},
+            "location": Point(17.03258, 51.10933, srid=4326),
             "address": "Wrocław, Rynek",
             "marked_for_deletion_at": None,
         },
@@ -49,7 +51,7 @@ def create_parking_points(users):
         {
             "key": "znikajacy_punkt",
             "user": users["bob"],
-            "location": {"lat": 52.00000, "lng": 21.00000},
+            "location": Point(21.00000, 52.00000, srid=4326),
             "address": "Test usuwania (zniknę po minucie)",
             # Ustawiamy czas tak, by do 30 dni brakowało mu tylko 60 sekund:
             "marked_for_deletion_at": now - timedelta(days=30) + timedelta(seconds=60),
@@ -65,6 +67,7 @@ def create_parking_points(users):
             defaults={
                 "user": data["user"],
                 "location": data["location"],
+                "original_location": data["location"], # Dodajemy original_location
                 "marked_for_deletion_at": data.get("marked_for_deletion_at"),
             },
         )

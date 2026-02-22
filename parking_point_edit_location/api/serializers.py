@@ -1,18 +1,18 @@
 from rest_framework import serializers
 from ..models import ParkingPointEditLocation
-from .validators import validate_location_structure
 from drf_spectacular.utils import extend_schema_field
-
+from parking_point.api.serializers import LatLngField # Importujemy nasze pole
 
 class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
     parkingPointId = serializers.IntegerField(source="parking_point.id", read_only=True)
     user = serializers.SerializerMethodField(read_only=True)
+    location = LatLngField() # Używamy LatLngField
 
     class Meta:
         model = ParkingPointEditLocation
         fields = [
             "id",
-            "location",  # JSONField zwracany bezpośrednio
+            "location",
             "parkingPointId",
             "user",
             "created_at",
@@ -36,13 +36,3 @@ class ParkingPointEditLocationSerializer(serializers.ModelSerializer):
             defaults={"location": validated_data["location"]},
         )
         return obj, created
-
-    @validate_location_structure()
-    # @validate_distance(min_distance=0, max_distance=100)
-    def validate(self, attrs):
-        """
-        Kolejność walidacji:
-        1. Czy location ma dobrą strukturę
-        2. Sprawdza odległość w zakresie 40-100m
-        """
-        return attrs
